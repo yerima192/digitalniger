@@ -10,11 +10,14 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import Header from "../../components/Header";
 import { useRouter } from "expo-router";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 
 export default function HomeScreen() {
   const router = useRouter();
 
   return (
+    <SafeAreaWrapper>
+      
     <ScreenWrapper>
       <StatusBar
         barStyle="dark-content"
@@ -43,14 +46,20 @@ export default function HomeScreen() {
 
         {/* Grid Cards */}
         <View style={styles.grid}>
-          <TouchableOpacity style={styles.gridCard} onPress={() => router.push("/evenements")}>
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push("/evenements")}
+          >
             <View style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}>
               <Ionicons name="calendar" size={28} color="#FF6600" />
             </View>
             <Text style={styles.gridCardText}>Événements</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.gridCard}>
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push("/acteurs")}
+          >
             <View style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}>
               <MaterialCommunityIcons
                 name="account-group"
@@ -61,14 +70,20 @@ export default function HomeScreen() {
             <Text style={styles.gridCardText}>Acteurs</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.gridCard}>
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push("/opportinity")}
+          >
             <View style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}>
               <Ionicons name="briefcase" size={28} color="#FF6600" />
             </View>
             <Text style={styles.gridCardText}>Opportunités</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.gridCard}>
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push("/favoris")}
+          >
             <View style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}>
               <Ionicons name="heart" size={28} color="#FF6600" />
             </View>
@@ -78,6 +93,7 @@ export default function HomeScreen() {
         <View style={{ height: 40 }} />
       </ScrollView>
     </ScreenWrapper>
+    </SafeAreaWrapper>
   );
 }
 

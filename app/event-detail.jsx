@@ -16,6 +16,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 
 // Données temporaires - à remplacer par votre backend
 import { eventsData } from "../data/eventsData";
+import SafeAreaWrapper from "../components/SafeAreaWrapper";
 
 export default function EventDetailScreen() {
   const router = useRouter();
@@ -49,6 +50,7 @@ export default function EventDetailScreen() {
   };
 
   return (
+    <SafeAreaWrapper>
     <View style={styles.container}>
       <StatusBar
         barStyle="dark-content"
@@ -181,6 +183,7 @@ export default function EventDetailScreen() {
         </TouchableOpacity>
       </View>
     </View>
+    </SafeAreaWrapper>
   );
 }
 
@@ -203,8 +206,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   backButton: {
-    width: 32,
-    height: 32,
+    width: 35,
+    height: 35,
     borderRadius: 24,
     backgroundColor: "#fff",
     justifyContent: "center",
@@ -216,8 +219,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   favoriteButton: {
-    width: 32,
-    height: 32,
+    width: 35,
+    height: 35,
     borderRadius: 24,
     backgroundColor: "#fff",
     justifyContent: "center",

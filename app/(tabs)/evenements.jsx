@@ -12,10 +12,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import ScreenWrapper from "../../components/ScreenWrapper";
+// import ScreenWrapper from "../../components/ScreenWrapper";
 import Header from "../../components/Header";
 // Données temporaires - à remplacer par votre backend
 import { eventsData } from "../../data/eventsData";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 
 
 export default function EvenementsScreen() {
@@ -95,7 +96,9 @@ export default function EvenementsScreen() {
   );
 
   return (
-    <ScreenWrapper>
+    <SafeAreaWrapper>
+
+    {/* <ScreenWrapper> */}
       <StatusBar
         barStyle="dark-content"
         backgroundColor="#FFF"
@@ -185,7 +188,8 @@ export default function EvenementsScreen() {
           </View>
         }
       />
-    </ScreenWrapper>
+    {/* </ScreenWrapper> */}
+    </SafeAreaWrapper>
   );
 }
 
