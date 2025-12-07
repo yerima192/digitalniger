@@ -3,7 +3,7 @@ import React from 'react'
 
 const Opportinity = () => {
   return (
-    <View>
+    <View style={styles.container}>
       <Text>opportinity</Text>
     </View>
   )
