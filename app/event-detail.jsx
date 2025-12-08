@@ -51,12 +51,6 @@ export default function EventDetailScreen() {
 
   return (
     <SafeAreaWrapper>
-      {Platform.OS === "ios" ? (
-        <StatusBar barStyle="dark-content" backgroundColor="rgba(0,0,0,0.5)" />
-      ) : (
-        <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-      )}
-
       <View style={styles.container}>
         {/* Fixed Header Buttons */}
         <View style={styles.headerButtons}>
