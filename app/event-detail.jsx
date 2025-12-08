@@ -52,12 +52,6 @@ export default function EventDetailScreen() {
   return (
     <SafeAreaWrapper>
     <View style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#fff"
-        translucent={false}
-      />
-
       {/* Fixed Header Buttons */}
       <View style={styles.headerButtons}>
         <TouchableOpacity

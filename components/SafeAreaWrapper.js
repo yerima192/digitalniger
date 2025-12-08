@@ -1,9 +1,10 @@
 import React from "react";
-import { SafeAreaView, StyleSheet, Platform } from "react-native";
+import { StyleSheet, Platform } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SafeAreaWrapper({ children, style }) {
   return (
-    <SafeAreaView style={[styles.container, style]}>
+    <SafeAreaView style={[styles.container, style]} edges={["top", "left", "right", "bottom"]}>
       {children}
     </SafeAreaView>
   );
@@ -12,7 +13,8 @@ export default function SafeAreaWrapper({ children, style }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === "android" ? 25 : 0, // pour éviter l’overlap sur Android
     backgroundColor: "#fff",
+    paddingBottom: Platform.OS === "android" ? 0 : 15,
   },
 });
+

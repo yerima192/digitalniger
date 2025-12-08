@@ -10,7 +10,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function TabLayout() {
   const activeColor = "#FF6600";
-  const inactiveColor = "#888888";
+  const inactiveColor = "#9CA3AF";
 
   return (
     <NativeTabs
@@ -18,13 +18,9 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: inactiveColor,
+        tabBarShowLabel: true, 
         tabBarStyle: {
-          // backgroundColor: "#FFFFFF",
-          // borderTopWidth: 1,
-          // borderTopColor: "#E5E5E5",
-          // height: 65,
-          // paddingBottom: 8,
-          // paddingTop: 8,
+          backgroundColor: "#FFFFFF", // background blanc sur Android
         },
       }}
     >
@@ -78,6 +74,7 @@ export default function TabLayout() {
     </NativeTabs>
   );
 }
+
 
 
 

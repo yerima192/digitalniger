@@ -6,11 +6,9 @@ import {
   TouchableOpacity,
   Switch,
   Animated,
-  StatusBar,
 } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-// import ScreenWrapper from "../../components/ScreenWrapper";
 import Header from "../../components/Header";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 
@@ -29,18 +27,15 @@ export default function ParametresScreen() {
 
   return (
     <SafeAreaWrapper>
-      {/* <ScreenWrapper> */}
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor="#FFF"
-          translucent={false}
-        />
         <ScrollView
           style={styles.container}
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
-          <Header title="Paramètres" badgeCount={1} />
+          <Header title="Paramètres" 
+          subtitle="Gérez vos préférences et votre compte"
+          
+          badgeCount={1} />
 
           {/* GÉNÉRAL Section */}
           <View style={styles.section}>
@@ -203,9 +198,8 @@ export default function ParametresScreen() {
           </View>
 
           {/* Espacement en bas */}
-          {/* <View style={{ height: 40 }} /> */}
+          <View style={{ height: 100 }} />
         </ScrollView>
-      {/* </ScreenWrapper> */}
     </SafeAreaWrapper>
   );
 }
@@ -213,8 +207,7 @@ export default function ParametresScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
-    // backgroundColor: "#F5F5F5",
+    backgroundColor: "#F9FAFB",
   },
   section: {
     marginTop: 20,

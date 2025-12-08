@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  StatusBar,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -99,12 +99,6 @@ export default function EvenementsScreen() {
     <SafeAreaWrapper>
 
     {/* <ScreenWrapper> */}
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#FFF"
-        translucent={false}
-      />
-      
       {/* Header */}
       <Header
         title="Événements"
@@ -188,6 +182,7 @@ export default function EvenementsScreen() {
           </View>
         }
       />
+      <View style={{ height: 71 }} />
     {/* </ScreenWrapper> */}
     </SafeAreaWrapper>
   );
@@ -195,9 +190,9 @@ export default function EvenementsScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
+    backgroundColor: "#F9FAFB",
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: 20,
     paddingBottom: 12,
   },
   searchContainer: {
@@ -277,11 +272,13 @@ const styles = StyleSheet.create({
   eventCard: {
     backgroundColor: "#fff",
     borderRadius: 16,
+    borderWidth: Platform.OS === 'ios' ? 0.4 : 0,
+    borderColor: "#E5E7EB",
     marginBottom: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: Platform.OS === 'android' ? 2 : 4},
+    shadowOpacity: Platform.OS === 'android' ? 0.05 : 2.1,
     shadowRadius: 8,
     elevation: 2,
   },

@@ -34,8 +34,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
     padding: 16,
-    paddingTop: Platform.OS === "ios" ? 15 : 50,
+    paddingTop: Platform.OS === "ios" ? 15 : 20,
     backgroundColor: "#FFF",
+    borderBottomWidth: 0.4,
+    borderBottomColor: "#E5E7EB",
+    position: "relative",
+    zIndex: 10,
   },
   title: {
     fontSize: 28,
