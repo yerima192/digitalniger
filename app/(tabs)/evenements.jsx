@@ -190,6 +190,7 @@ export default function EvenementsScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    // backgroundColor: "#FFFFFF",
     backgroundColor: "#F9FAFB",
     paddingHorizontal: 16,
     paddingTop: 20,
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     paddingHorizontal: 16,
     height: 48,
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
   filterButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     paddingHorizontal: 16,
     height: 48,

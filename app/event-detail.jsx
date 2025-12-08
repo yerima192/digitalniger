@@ -51,132 +51,138 @@ export default function EventDetailScreen() {
 
   return (
     <SafeAreaWrapper>
-    <View style={styles.container}>
-      {/* Fixed Header Buttons */}
-      <View style={styles.headerButtons}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.push("/evenements")}
-        >
-          <Ionicons name="chevron-back" size={24} color="#111827" />
-        </TouchableOpacity>
+      {Platform.OS === "ios" ? (
+        <StatusBar barStyle="dark-content" backgroundColor="rgba(0,0,0,0.5)" />
+      ) : (
+        <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+      )}
 
-        <TouchableOpacity
-          style={styles.favoriteButton}
-          onPress={toggleFavorite}
-        >
-          <Ionicons
-            name={isFavorite ? "heart" : "heart-outline"}
-            size={24}
-            color={isFavorite ? "#EF4444" : "#111827"}
-          />
-        </TouchableOpacity>
-      </View>
+      <View style={styles.container}>
+        {/* Fixed Header Buttons */}
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.push("/evenements")}
+          >
+            <Ionicons name="chevron-back" size={24} color="#111827" />
+          </TouchableOpacity>
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Hero Image */}
-        <View style={styles.heroContainer}>
-          <Image source={{ uri: event.image }} style={styles.heroImage} />
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={toggleFavorite}
+          >
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={24}
+              color={isFavorite ? "#EF4444" : "#111827"}
+            />
+          </TouchableOpacity>
         </View>
 
-        {/* Content */}
-        <View style={styles.content}>
-          <Text style={styles.title}>{event.title}</Text>
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Hero Image */}
+          <View style={styles.heroContainer}>
+            <Image source={{ uri: event.image }} style={styles.heroImage} />
+          </View>
 
-          {/* Badges */}
-          <View style={styles.badgesContainer}>
-            <View style={styles.typeBadge}>
-              <Text style={styles.typeBadgeText}>{event.type}</Text>
-            </View>
-            <View
-              style={[
-                styles.priceBadge,
-                event.price === "Gratuit"
-                  ? styles.gratuitBadge
-                  : styles.payantBadge,
-              ]}
-            >
-              <Text
+          {/* Content */}
+          <View style={styles.content}>
+            <Text style={styles.title}>{event.title}</Text>
+
+            {/* Badges */}
+            <View style={styles.badgesContainer}>
+              <View style={styles.typeBadge}>
+                <Text style={styles.typeBadgeText}>{event.type}</Text>
+              </View>
+              <View
                 style={[
-                  styles.priceBadgeText,
+                  styles.priceBadge,
                   event.price === "Gratuit"
-                    ? styles.gratuitText
-                    : styles.payantText,
+                    ? styles.gratuitBadge
+                    : styles.payantBadge,
                 ]}
               >
-                {event.price}
-              </Text>
+                <Text
+                  style={[
+                    styles.priceBadgeText,
+                    event.price === "Gratuit"
+                      ? styles.gratuitText
+                      : styles.payantText,
+                  ]}
+                >
+                  {event.price}
+                </Text>
+              </View>
             </View>
-          </View>
 
-          {/* Date & Time */}
-          <View style={styles.infoCard}>
-            <View style={styles.iconBox}>
-              <Ionicons name="calendar-outline" size={24} color="#FF6600" />
-            </View>
-            <View style={styles.infoText}>
-              <Text style={styles.infoTitle}>{event.date}</Text>
-              <Text style={styles.infoSubtitle}>{event.time}</Text>
-            </View>
-          </View>
-
-          {/* Description */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.description}>{event.description}</Text>
-          </View>
-
-          {/* Location */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Lieu</Text>
-            <View style={styles.locationCard}>
+            {/* Date & Time */}
+            <View style={styles.infoCard}>
               <View style={styles.iconBox}>
-                <Ionicons name="location-outline" size={24} color="#FF6600" />
+                <Ionicons name="calendar-outline" size={24} color="#FF6600" />
               </View>
               <View style={styles.infoText}>
-                <Text style={styles.infoTitle}>{event.location}</Text>
-                <Text style={styles.infoSubtitle}>
-                  {event.city}, {event.country}
-                </Text>
+                <Text style={styles.infoTitle}>{event.date}</Text>
+                <Text style={styles.infoSubtitle}>{event.time}</Text>
               </View>
             </View>
-          </View>
 
-          {/* Organizer */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Organisateur</Text>
-            <View style={styles.organizerContainer}>
-              <View style={styles.organizerIcon}>
-                <Ionicons name="business" size={24} color="#fff" />
-              </View>
-              <View style={styles.organizerText}>
-                <Text style={styles.organizerTitle}>{event.organizer}</Text>
-                <Text style={styles.organizerSubtitle}>
-                  {event.organizerTagline}
-                </Text>
+            {/* Description */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.description}>{event.description}</Text>
+            </View>
+
+            {/* Location */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Lieu</Text>
+              <View style={styles.locationCard}>
+                <View style={styles.iconBox}>
+                  <Ionicons name="location-outline" size={24} color="#FF6600" />
+                </View>
+                <View style={styles.infoText}>
+                  <Text style={styles.infoTitle}>{event.location}</Text>
+                  <Text style={styles.infoSubtitle}>
+                    {event.city}, {event.country}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
 
-          <View style={{ height: 100 }} />
+            {/* Organizer */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Organisateur</Text>
+              <View style={styles.organizerContainer}>
+                <View style={styles.organizerIcon}>
+                  <Ionicons name="business" size={24} color="#fff" />
+                </View>
+                <View style={styles.organizerText}>
+                  <Text style={styles.organizerTitle}>{event.organizer}</Text>
+                  <Text style={styles.organizerSubtitle}>
+                    {event.organizerTagline}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={{ height: 100 }} />
+          </View>
+        </ScrollView>
+
+        {/* Register Button */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={handleRegister}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.registerButtonText}>S&apos;inscrire</Text>
+            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-
-      {/* Register Button */}
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.registerButton}
-          onPress={handleRegister}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.registerButtonText}>S&apos;inscrire</Text>
-          <Ionicons name="arrow-forward" size={20} color="#fff" />
-        </TouchableOpacity>
       </View>
-    </View>
     </SafeAreaWrapper>
   );
 }
@@ -191,7 +197,7 @@ const styles = StyleSheet.create({
   },
   headerButtons: {
     position: "absolute",
-    top: Platform.OS === 'ios' ? 15 : 48,
+    top: Platform.OS === "ios" ? 15 : 48,
     left: 0,
     right: 0,
     flexDirection: "row",
