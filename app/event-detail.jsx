@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   },
   headerButtons: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 15 : 48,
+    top: Platform.OS === "ios" ? 15 : 30,
     left: 0,
     right: 0,
     flexDirection: "row",
