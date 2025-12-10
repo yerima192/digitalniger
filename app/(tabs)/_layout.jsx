@@ -18,9 +18,11 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: inactiveColor,
-        tabBarShowLabel: true, 
+        tabBarShowLabel: true,
         tabBarStyle: {
           backgroundColor: "#FFFFFF", // background blanc sur Android
+          borderTopWidth: 0.4,
+          borderTopColor: "#E5E7EB",
         },
       }}
     >
@@ -75,10 +77,6 @@ export default function TabLayout() {
   );
 }
 
-
-
-
-
 // import { Tabs } from "expo-router";
 // import { Platform } from "react-native";
 // import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -122,10 +120,10 @@ export default function TabLayout() {
 //         options={{
 //           title: "Accueil",
 //           tabBarIcon: ({ color, focused }) => (
-//             <MaterialIcons 
-//               name="home" 
-//               size={focused ? 28 : 26} 
-//               color={color} 
+//             <MaterialIcons
+//               name="home"
+//               size={focused ? 28 : 26}
+//               color={color}
 //             />
 //           ),
 //         }}
@@ -136,10 +134,10 @@ export default function TabLayout() {
 //         options={{
 //           title: "Événements",
 //           tabBarIcon: ({ color, focused }) => (
-//             <Ionicons 
-//               name="calendar" 
-//               size={focused ? 26 : 24} 
-//               color={color} 
+//             <Ionicons
+//               name="calendar"
+//               size={focused ? 26 : 24}
+//               color={color}
 //             />
 //           ),
 //         }}
@@ -150,10 +148,10 @@ export default function TabLayout() {
 //         options={{
 //           title: "Acteurs",
 //           tabBarIcon: ({ color, focused }) => (
-//             <MaterialIcons 
-//               name="people" 
-//               size={focused ? 28 : 26} 
-//               color={color} 
+//             <MaterialIcons
+//               name="people"
+//               size={focused ? 28 : 26}
+//               color={color}
 //             />
 //           ),
 //         }}
@@ -164,10 +162,10 @@ export default function TabLayout() {
 //         options={{
 //           title: "Favoris",
 //           tabBarIcon: ({ color, focused }) => (
-//             <Ionicons 
-//               name={focused ? "heart" : "heart-outline"} 
-//               size={focused ? 26 : 24} 
-//               color={color} 
+//             <Ionicons
+//               name={focused ? "heart" : "heart-outline"}
+//               size={focused ? 26 : 24}
+//               color={color}
 //             />
 //           ),
 //         }}
@@ -178,10 +176,10 @@ export default function TabLayout() {
 //         options={{
 //           title: "Paramètres",
 //           tabBarIcon: ({ color, focused }) => (
-//             <Ionicons 
-//               name={focused ? "settings" : "settings-outline"} 
-//               size={focused ? 26 : 24} 
-//               color={color} 
+//             <Ionicons
+//               name={focused ? "settings" : "settings-outline"}
+//               size={focused ? 26 : 24}
+//               color={color}
 //             />
 //           ),
 //         }}
