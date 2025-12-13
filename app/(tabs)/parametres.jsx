@@ -9,10 +9,10 @@ import {
 } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 import Header from "../../components/Header";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 import { router } from "expo-router";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 
 export default function ParametresScreen() {
   const [notificationsPush, setNotificationsPush] = useState(true);
@@ -29,15 +29,12 @@ export default function ParametresScreen() {
 
   return (
     <SafeAreaWrapper>
-      <ScrollView
-        style={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <Header 
-          title="Paramètres" 
+        <Header
+          title="Paramètres"
           subtitle="Gérez vos préférences et votre compte"
-          badgeCount={1} 
+          badgeCount={1}
         />
 
         {/* GÉNÉRAL Section */}
@@ -47,13 +44,13 @@ export default function ParametresScreen() {
             <Text style={styles.sectionTitle}>GÉNÉRAL</Text>
             <View style={styles.sectionTitleLine} />
           </View>
-          
+
           <View style={styles.card}>
             {/* Notifications Push */}
             <View style={styles.settingRow}>
               <View style={styles.settingLeft}>
                 <LinearGradient
-                  colors={['#FFE8D6', '#FFD4B3']}
+                  colors={["#FFE8D6", "#FFD4B3"]}
                   style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}
                 >
                   <Ionicons name="notifications" size={24} color="#FF6600" />
@@ -82,7 +79,7 @@ export default function ParametresScreen() {
             <View style={styles.settingRow}>
               <View style={styles.settingLeft}>
                 <LinearGradient
-                  colors={['#F3F4F6', '#E5E7EB']}
+                  colors={["#F3F4F6", "#E5E7EB"]}
                   style={[styles.iconCircle, { backgroundColor: "#F3F4F6" }]}
                 >
                   <Ionicons
@@ -116,17 +113,17 @@ export default function ParametresScreen() {
             <Text style={styles.sectionTitle}>COMPTE</Text>
             <View style={styles.sectionTitleLine} />
           </View>
-          
+
           <View style={styles.card}>
             {/* Gérer mon compte */}
-            <TouchableOpacity 
-              style={styles.settingRow} 
+            <TouchableOpacity
+              style={styles.settingRow}
               onPress={() => router.push("/gerer-compte")}
               activeOpacity={0.7}
             >
               <View style={styles.settingLeft}>
                 <LinearGradient
-                  colors={['#EFF6FF', '#DBEAFE']}
+                  colors={["#EFF6FF", "#DBEAFE"]}
                   style={[styles.iconCircle, { backgroundColor: "#EFF6FF" }]}
                 >
                   <Ionicons name="person-outline" size={24} color="#3B82F6" />
@@ -146,20 +143,13 @@ export default function ParametresScreen() {
             <View style={styles.separator} />
 
             {/* Se déconnecter */}
-            <TouchableOpacity 
-              style={styles.settingRow}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
               <View style={styles.settingLeft}>
                 <LinearGradient
-                  colors={['#FEE2E2', '#FECACA']}
+                  colors={["#FEE2E2", "#FECACA"]}
                   style={[styles.iconCircle, { backgroundColor: "#FEE2E2" }]}
                 >
-                  <Ionicons
-                    name="log-out-outline"
-                    size={24}
-                    color="#DC2626"
-                  />
+                  <Ionicons name="log-out-outline" size={24} color="#DC2626" />
                 </LinearGradient>
                 <View style={styles.textContainer}>
                   <Text style={[styles.settingText, { color: "#DC2626" }]}>
@@ -181,16 +171,13 @@ export default function ParametresScreen() {
             <Text style={styles.sectionTitle}>À PROPOS</Text>
             <View style={styles.sectionTitleLine} />
           </View>
-          
+
           <View style={styles.card}>
             {/* Aide et support */}
-            <TouchableOpacity 
-              style={styles.settingRow}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
               <View style={styles.settingLeft}>
                 <LinearGradient
-                  colors={['#F0FDF4', '#DCFCE7']}
+                  colors={["#F0FDF4", "#DCFCE7"]}
                   style={[styles.iconCircle, { backgroundColor: "#F0FDF4" }]}
                 >
                   <Ionicons
@@ -214,13 +201,10 @@ export default function ParametresScreen() {
             <View style={styles.separator} />
 
             {/* Politique de confidentialité */}
-            <TouchableOpacity 
-              style={styles.settingRow}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
               <View style={styles.settingLeft}>
                 <LinearGradient
-                  colors={['#FDF4FF', '#FAE8FF']}
+                  colors={["#FDF4FF", "#FAE8FF"]}
                   style={[styles.iconCircle, { backgroundColor: "#FDF4FF" }]}
                 >
                   <MaterialCommunityIcons
@@ -249,7 +233,7 @@ export default function ParametresScreen() {
             <View style={styles.settingRow}>
               <View style={styles.settingLeft}>
                 <LinearGradient
-                  colors={['#E0E7FF', '#C7D2FE']}
+                  colors={["#E0E7FF", "#C7D2FE"]}
                   style={[styles.iconCircle, { backgroundColor: "#E0E7FF" }]}
                 >
                   <Ionicons
@@ -275,7 +259,7 @@ export default function ParametresScreen() {
         </View>
 
         {/* Espacement en bas */}
-        <View style={{ height: 100 }} />
+        <View style={{ height: 10 }} />
       </ScrollView>
     </SafeAreaWrapper>
   );
@@ -284,29 +268,29 @@ export default function ParametresScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    // backgroundColor: "#FFFFFF",
   },
   section: {
     marginTop: 24,
     paddingHorizontal: 16,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
     gap: 12,
   },
   sectionTitleLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: "#E5E7EB",
   },
   sectionTitle: {
     fontSize: 15,
     fontWeight: "700",
     color: "#374151",
     letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   card: {
     backgroundColor: "#FFFFFF",
@@ -322,7 +306,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: "#F3F4F6",
   },
   settingRow: {
     flexDirection: "row",
@@ -374,12 +358,12 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
   },
   versionBadge: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: "#F3F4F6",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
