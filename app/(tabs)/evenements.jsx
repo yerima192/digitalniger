@@ -8,16 +8,13 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from "expo-router";
-// import ScreenWrapper from "../../components/ScreenWrapper";
 import Header from "../../components/Header";
-// Données temporaires - à remplacer par votre backend
 import { eventsData } from "../../data/eventsData";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
-
 
 export default function EvenementsScreen() {
   const router = useRouter();
@@ -47,6 +44,10 @@ export default function EvenementsScreen() {
     >
       <View style={styles.eventImageContainer}>
         <Image source={{ uri: item.image }} style={styles.eventImage} />
+        <LinearGradient
+          colors={['transparent', 'rgba(0, 0, 0, 0.3)']}
+          style={styles.imageGradient}
+        />
         <View
           style={[
             styles.priceBadge,
@@ -64,16 +65,23 @@ export default function EvenementsScreen() {
         </View>
       </View>
       <View style={styles.eventCardContent}>
-        <Text style={styles.eventType}>{item.type}</Text>
+        <View style={styles.typeContainer}>
+          <View style={styles.typeDot} />
+          <Text style={styles.eventType}>{item.type}</Text>
+        </View>
         <Text style={styles.eventTitle} numberOfLines={2}>
           {item.title}
         </Text>
         <View style={styles.eventDateContainer}>
-          <Ionicons name="calendar-outline" size={16} color="#6B7280" />
+          <View style={styles.iconWrapper}>
+            <Ionicons name="calendar-outline" size={16} color="#6B7280" />
+          </View>
           <Text style={styles.eventDate}>{item.date}</Text>
         </View>
         <View style={styles.eventLocationContainer}>
-          <Ionicons name="location-outline" size={16} color="#6B7280" />
+          <View style={styles.iconWrapper}>
+            <Ionicons name="location-outline" size={16} color="#6B7280" />
+          </View>
           <Text style={styles.eventLocation}>
             {item.city}, {item.country}
           </Text>
@@ -86,6 +94,7 @@ export default function EvenementsScreen() {
     <TouchableOpacity
       style={[styles.filterBtn, selected && styles.filterBtnActive]}
       onPress={onPress}
+      activeOpacity={0.7}
     >
       <Text
         style={[styles.filterBtnText, selected && styles.filterBtnTextActive]}
@@ -97,8 +106,6 @@ export default function EvenementsScreen() {
 
   return (
     <SafeAreaWrapper>
-
-    {/* <ScreenWrapper> */}
       {/* Header */}
       <Header
         title="Événements"
@@ -110,7 +117,9 @@ export default function EvenementsScreen() {
         {/* Search and Filter */}
         <View style={styles.searchContainer}>
           <View style={styles.searchInputContainer}>
-            <Ionicons name="search-outline" size={20} color="#9CA3AF" />
+            <View style={styles.searchIconCircle}>
+              <Ionicons name="search-outline" size={18} color="#6B7280" />
+            </View>
             <TextInput
               style={styles.searchInput}
               placeholder="Rechercher un événement..."
@@ -120,11 +129,26 @@ export default function EvenementsScreen() {
             />
           </View>
           <TouchableOpacity
-            style={styles.filterButton}
+            style={[styles.filterButton, showFilters && styles.filterButtonActive]}
             onPress={() => setShowFilters(!showFilters)}
+            activeOpacity={0.7}
           >
-            <Ionicons name="options-outline" size={20} color="#111827" />
-            <Text style={styles.filterButtonText}>Filtres</Text>
+            <LinearGradient
+              colors={showFilters ? ['#FF7F27', '#FF6600'] : ['#FFFFFF', '#FFFFFF']}
+              style={styles.filterButtonGradient}
+            >
+              <Ionicons 
+                name="options-outline" 
+                size={20} 
+                color={showFilters ? "#FFFFFF" : "#111827"} 
+              />
+              <Text style={[
+                styles.filterButtonText,
+                showFilters && styles.filterButtonTextActive
+              ]}>
+                Filtres
+              </Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
 
@@ -132,7 +156,10 @@ export default function EvenementsScreen() {
         {showFilters && (
           <View style={styles.filtersPanel}>
             <View style={styles.filterSection}>
-              <Text style={styles.filterLabel}>Type</Text>
+              <View style={styles.filterLabelContainer}>
+                <Ionicons name="pricetag-outline" size={16} color="#6B7280" />
+                <Text style={styles.filterLabel}>Type</Text>
+              </View>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={styles.filterOptions}>
                   {["Tous", "Conférence", "Atelier", "Meetup", "Formation"].map(
@@ -149,7 +176,10 @@ export default function EvenementsScreen() {
               </ScrollView>
             </View>
             <View style={styles.filterSection}>
-              <Text style={styles.filterLabel}>Prix</Text>
+              <View style={styles.filterLabelContainer}>
+                <Ionicons name="cash-outline" size={16} color="#6B7280" />
+                <Text style={styles.filterLabel}>Prix</Text>
+              </View>
               <View style={styles.filterOptions}>
                 {["Tous", "Gratuit", "Payant"].map((price) => (
                   <FilterButton
@@ -174,7 +204,9 @@ export default function EvenementsScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="calendar-outline" size={64} color="#D1D5DB" />
+            <View style={styles.emptyIconCircle}>
+              <Ionicons name="calendar-outline" size={48} color="#9CA3AF" />
+            </View>
             <Text style={styles.emptyText}>Aucun événement trouvé</Text>
             <Text style={styles.emptySubtext}>
               Essayez de modifier vos filtres
@@ -182,15 +214,13 @@ export default function EvenementsScreen() {
           </View>
         }
       />
-      <View style={{ height: 71 }} />
-    {/* </ScreenWrapper> */}
+      <View style={{ height: 0 }} />
     </SafeAreaWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    // backgroundColor: "#FFFFFF",
     backgroundColor: "#F9FAFB",
     paddingHorizontal: 16,
     paddingTop: 20,
@@ -208,41 +238,83 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingHorizontal: 16,
     height: 48,
-    gap: 8,
+    gap: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  searchIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F9FAFB',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 12,
     color: "#111827",
+    fontWeight: '500',
   },
   filterButton: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  filterButtonActive: {
+    shadowColor: "#FF6600",
+    shadowOpacity: 0.3,
+  },
+  filterButtonGradient: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
     paddingHorizontal: 16,
     height: 48,
     gap: 6,
   },
   filterButtonText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#111827",
   },
-  filtersPanel: {
+  filterButtonTextActive: {
+    color: "#FFFFFF",
+  },
+  filtersPanel: { 
     marginTop: 16,
     padding: 16,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   filterSection: {
     marginBottom: 12,
   },
+  filterLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
+  },
   filterLabel: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#374151",
-    marginBottom: 8,
   },
   filterOptions: {
     flexDirection: "row",
@@ -252,36 +324,39 @@ const styles = StyleSheet.create({
   filterBtn: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9FAFB",
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   filterBtnActive: {
     backgroundColor: "#FFF7ED",
+    borderColor: '#FF6600',
   },
   filterBtnText: {
     fontSize: 14,
-    color: "#111827",
+    color: "#6B7280",
+    fontWeight: '500',
   },
   filterBtnTextActive: {
     color: "#FF6600",
-    fontWeight: "600",
+    fontWeight: "700",
   },
   eventsList: {
     padding: 16,
-    // paddingBottom: 80,
   },
   eventCard: {
     backgroundColor: "#fff",
-    borderRadius: 16,
-    borderWidth: Platform.OS === 'ios' ? 0.4 : 0,
-    borderColor: "#E5E7EB",
+    borderRadius: 20,
     marginBottom: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: Platform.OS === 'android' ? 2 : 4},
-    shadowOpacity: Platform.OS === 'android' ? 0.05 : 2.1,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   eventImageContainer: {
     position: "relative",
@@ -291,13 +366,25 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  imageGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+  },
   priceBadge: {
     position: "absolute",
     top: 12,
     right: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   gratuitBadge: {
     backgroundColor: "#D1FAE5",
@@ -307,7 +394,7 @@ const styles = StyleSheet.create({
   },
   priceBadgeText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   gratuitText: {
     color: "#059669",
@@ -318,51 +405,85 @@ const styles = StyleSheet.create({
   eventCardContent: {
     padding: 16,
   },
+  typeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  typeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#FF6600",
+  },
   eventType: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#FF6600",
-    marginBottom: 6,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   eventTitle: {
     fontSize: 17,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#111827",
-    marginBottom: 8,
+    marginBottom: 12,
+    lineHeight: 24,
   },
   eventDateContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginBottom: 4,
-  },
-  eventDate: {
-    fontSize: 14,
-    color: "#6B7280",
+    gap: 8,
+    marginBottom: 6,
   },
   eventLocationContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
+  },
+  iconWrapper: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#F9FAFB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  eventDate: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: '500',
   },
   eventLocation: {
     fontSize: 14,
-    color: "#6A737D",
+    color: "#6B7280",
+    fontWeight: '500',
   },
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 60,
   },
+  emptyIconCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   emptyText: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#374151",
-    marginTop: 16,
+    marginTop: 8,
   },
   emptySubtext: {
     fontSize: 14,
     color: "#9CA3AF",
-    marginTop: 4,
+    marginTop: 6,
+    fontWeight: '500',
   },
 });

@@ -22,7 +22,6 @@ export default function ActeursScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    // backgroundColor: "#F9FAFB",
+    backgroundColor: "#F9FAFB",
   },
 });

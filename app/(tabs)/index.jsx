@@ -8,8 +8,8 @@ import {
   Easing,
 } from "react-native";
 import { useEffect, useRef } from "react";
-
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from 'expo-linear-gradient';
 import Header from "../../components/Header";
 import { useRouter } from "expo-router";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
@@ -57,16 +57,20 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaWrapper>
-        <ScrollView style={styles.container}>
-          {/* Header */}
-          <Header
-            title="Bienvenue!"
-            subtitle="Découvrez l'écosystème tech du Niger"
-            badgeCount={44}
-          />
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <Header
+          title="Bienvenue!"
+          subtitle="Découvrez l'écosystème tech du Niger"
+          badgeCount={44}
+        />
 
-          {/* Featured Card */}
-          <View style={styles.featuredCard}>
+        {/* Featured Card */}
+        <View style={styles.featuredCardContainer}>
+          <LinearGradient
+            colors={['#003D6B', '#004d7a']}
+            style={styles.featuredCard}
+          >
             {/* Cercles animés */}
             <Animated.View
               style={[
@@ -106,7 +110,7 @@ export default function HomeScreen() {
               ]}
             />
 
-            {/* Ton contenu */}
+            {/* Contenu */}
             <Text style={styles.featuredTitle}>Découvrez le Tech du Niger</Text>
             <Text style={styles.featuredDescription}>
               Explorez les projets, événements et opportunités qui transforment
@@ -114,60 +118,83 @@ export default function HomeScreen() {
             </Text>
             <TouchableOpacity
               style={styles.participerButton}
-              // onPress={() => router.push("/evenements")}
-            >
-              <Text style={styles.participerText}>Participer</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Grid Cards */}
-          <View style={styles.grid}>
-            <TouchableOpacity
-              style={styles.gridCard}
               onPress={() => router.push("/evenements")}
+              activeOpacity={0.8}
             >
-              <View style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}>
-                <Ionicons name="calendar" size={28} color="#FF6600" />
-              </View>
-              <Text style={styles.gridCardText}>Événements</Text>
+              <LinearGradient
+                colors={['#FF7F27', '#FF6600']}
+                style={styles.buttonGradient}
+              >
+                <Text style={styles.participerText}>Participer</Text>
+              </LinearGradient>
             </TouchableOpacity>
+          </LinearGradient>
+        </View>
 
-            <TouchableOpacity
-              style={styles.gridCard}
-              onPress={() => router.push("/acteurs")}
+        {/* Grid Cards */}
+        <View style={styles.grid}>
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push("/evenements")}
+            activeOpacity={0.7}
+          >
+            <LinearGradient
+              colors={['#FFE8D6', '#FFD4B3']}
+              style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}
             >
-              <View style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}>
-                <MaterialCommunityIcons
-                  name="account-group"
-                  size={28}
-                  color="#FF6600"
-                />
-              </View>
-              <Text style={styles.gridCardText}>Acteurs</Text>
-            </TouchableOpacity>
+              <Ionicons name="calendar" size={28} color="#FF6600" />
+            </LinearGradient>
+            <Text style={styles.gridCardText}>Événements</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.gridCard}
-              onPress={() => router.push("/opportunites")}
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push("/acteurs")}
+            activeOpacity={0.7}
+          >
+            <LinearGradient
+              colors={['#FFE8D6', '#FFD4B3']}
+              style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}
             >
-              <View style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}>
-                <Ionicons name="briefcase" size={28} color="#FF6600" />
-              </View>
-              <Text style={styles.gridCardText}>Opportunités</Text>
-            </TouchableOpacity>
+              <MaterialCommunityIcons
+                name="account-group"
+                size={28}
+                color="#FF6600"
+              />
+            </LinearGradient>
+            <Text style={styles.gridCardText}>Acteurs</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.gridCard}
-              onPress={() => router.push("/favoris")}
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push("/opportunites")}
+            activeOpacity={0.7}
+          >
+            <LinearGradient
+              colors={['#FFE8D6', '#FFD4B3']}
+              style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}
             >
-              <View style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}>
-                <Ionicons name="heart" size={28} color="#FF6600" />
-              </View>
-              <Text style={styles.gridCardText}>Favoris</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{ height: 30 }} />
-        </ScrollView>
+              <Ionicons name="briefcase" size={28} color="#FF6600" />
+            </LinearGradient>
+            <Text style={styles.gridCardText}>Opportunités</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.gridCard}
+            onPress={() => router.push("/favoris")}
+            activeOpacity={0.7}
+          >
+            <LinearGradient
+              colors={['#FFE8D6', '#FFD4B3']}
+              style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}
+            >
+              <Ionicons name="heart" size={28} color="#FF6600" />
+            </LinearGradient>
+            <Text style={styles.gridCardText}>Favoris</Text>
+          </TouchableOpacity>
+        </View>
+        {/* <View style={{ height: 30 }} /> */}
+      </ScrollView>
     </SafeAreaWrapper>
   );
 }
@@ -175,16 +202,21 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: "#F9FAFB",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F9FAFB",
   },
-  featuredCard: {
-    overflow: "hidden",
-    backgroundColor: "#003D6B",
+  featuredCardContainer: {
     marginHorizontal: 16,
     marginVertical: 12,
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: "#003D6B",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  featuredCard: {
     padding: 20,
-    borderRadius: 16,
     minHeight: 160,
   },
   animatedCircle: {
@@ -193,9 +225,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 40,
     backgroundColor: "#5b4e40d6",
-    // backgroundColor: "#5b4e40bb",
   },
-
   featuredTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -209,11 +239,18 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   participerButton: {
-    backgroundColor: "#FF7F27",
+    alignSelf: "flex-start",
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: "#FF6600",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  buttonGradient: {
     paddingVertical: 10,
     paddingHorizontal: 28,
-    borderRadius: 20,
-    alignSelf: "flex-start",
   },
   participerText: {
     color: "#FFF",
@@ -229,28 +266,35 @@ const styles = StyleSheet.create({
   },
   gridCard: {
     backgroundColor: "#FFF",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 20,
     width: "47.5%",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
     minHeight: 130,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   iconCircle: {
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   gridCardText: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#333",
+    color: "#111827",
   },
 });

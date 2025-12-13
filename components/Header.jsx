@@ -1,79 +1,164 @@
 // components/Header.js
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { LinearGradient } from 'expo-linear-gradient';
 
-export default function Header({ title, subtitle, badgeCount }) {
+export default function Header({ title, subtitle, badgeCount, showBack = false }) {
+  const router = useRouter();
+  
   return (
-    <View style={styles.header}>
-      <View>
-        <Text style={styles.title}>{title}</Text>
-        {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
-      </View>
-      <View style={styles.headerIcons}>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="notifications-outline" size={24} color="#333" />
-          {badgeCount > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{badgeCount}</Text>
+    <View style={styles.headerContainer}>
+      <LinearGradient
+        colors={['#FFFFFF', '#F8FAFC']}
+        style={styles.gradientBackground}
+      >
+        <View style={styles.header}>
+          {/* --- Back Button --- */}
+          {showBack && (
+            <TouchableOpacity 
+              onPress={() => router.back()} 
+              style={styles.backButton}
+              activeOpacity={0.7}
+            >
+              <View style={styles.iconWrapper}>
+                <Ionicons name="arrow-back" size={22} color="#1F2937" />
+              </View>
+            </TouchableOpacity>
+          )}
+          
+          <View style={styles.titleContainer}>
+            <Text style={styles.title} numberOfLines={1}>{title}</Text>
+            {subtitle && <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text>}
+          </View>
+          
+          {/* --- Icons Right --- */}
+          {!showBack && (
+            <View style={styles.headerIcons}>
+              <TouchableOpacity 
+                style={styles.iconButton}
+                activeOpacity={0.7}
+              >
+                <View style={styles.iconWrapper}>
+                  <Ionicons name="notifications-outline" size={22} color="#1F2937" />
+                  {badgeCount > 0 && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>
+                        {badgeCount > 99 ? '99+' : badgeCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.iconButton}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.iconWrapper, styles.profileWrapper]}>
+                  <Ionicons name="person-circle-outline" size={26} color="#1F2937" />
+                </View>
+              </TouchableOpacity>
             </View>
           )}
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="person-circle-outline" size={28} color="#333" />
-        </TouchableOpacity>
-      </View>
+        </View>
+      </LinearGradient>
+      
+      {/* Subtle shadow line */}
+      <View style={styles.shadowLine} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    backgroundColor: '#FFFFFF',
+  },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    padding: 16,
-    paddingTop: Platform.OS === "ios" ? 15 : 20,
-    backgroundColor: "#FFF",
-    borderBottomWidth: 0.4,
-    borderBottomColor: "#E5E7EB",
-    position: "relative",
-    zIndex: 10,
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "transparent",
+  },
+  backButton: {
+    marginRight: 12,
+  },
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  profileWrapper: {
+    backgroundColor: '#EFF6FF',
+  },
+  titleContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
+    fontSize: 26,
+    fontWeight: "800",
+    color: "#111827",
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 13,
-    color: "#888",
+    color: "#6B7280",
+    marginTop: 2,
+    fontWeight: "500",
   },
   headerIcons: {
     flexDirection: "row",
-    gap: 10,
+    gap: 8,
+    alignItems: 'center',
   },
   iconButton: {
-    padding: 4,
+    padding: 2,
   },
   badge: {
     position: "absolute",
-    top: -4,
-    right: -4,
+    top: -2,
+    right: -2,
     backgroundColor: "#FF7F27",
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
+    borderRadius: 12,
+    minWidth: 20,
+    height: 20,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 4,
-    zIndex: 100,
+    paddingHorizontal: 5,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    shadowColor: "#EF4444",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
   },
   badgeText: {
-    color: "#fff",
+    color: "#FFF",
     fontSize: 10,
-    fontWeight: "bold",
+    fontWeight: "700",
+    letterSpacing: -0.2,
+  },
+  shadowLine: {
+    height: 1,
+    backgroundColor: '#E5E7EB',
+    opacity: 0.5,
   },
 });
