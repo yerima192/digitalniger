@@ -3,17 +3,15 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { LinearGradient } from 'expo-linear-gradient';
+// import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Header({ title, subtitle, badgeCount, showBack = false }) {
   const router = useRouter();
   
   return (
     <View style={styles.headerContainer}>
-      <LinearGradient
-        colors={['#FFFFFF', '#F8FAFC']}
-        style={styles.gradientBackground}
-      >
+      {/* <LinearGradient colors={['#FFFFFF', '#F8FAFC']}></LinearGradient> */}
+      <View style={styles.gradientBackground}>
         <View style={styles.header}>
           {/* --- Back Button --- */}
           {showBack && (
@@ -63,7 +61,7 @@ export default function Header({ title, subtitle, badgeCount, showBack = false }
             </View>
           )}
         </View>
-      </LinearGradient>
+      </View>
       
       {/* Subtle shadow line */}
       <View style={styles.shadowLine} />
@@ -73,7 +71,7 @@ export default function Header({ title, subtitle, badgeCount, showBack = false }
 
 const styles = StyleSheet.create({
   headerContainer: {
-    backgroundColor: '#FFFFFF',
+    // backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: "row",
