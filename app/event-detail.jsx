@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { eventsData } from "../data/eventsData";
-import SafeAreaWrapper from "../components/SafeAreaWrapper";
+// import SafeAreaWrapper from "../components/SafeAreaWrapper";
 
 export default function EventDetailScreen() {
   const router = useRouter();
