@@ -12,7 +12,7 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { eventsData } from "../data/eventsData";
 import SafeAreaWrapper from "../components/SafeAreaWrapper";
@@ -32,7 +32,7 @@ export default function EventDetailScreen() {
           <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
         </View>
         <Text style={styles.errorText}>Événement introuvable</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.errorButton}
           onPress={() => router.back()}
         >
@@ -55,195 +55,204 @@ export default function EventDetailScreen() {
   };
 
   return (
-    <SafeAreaWrapper>
-      <View style={styles.container}>
-        {/* Fixed Header Buttons */}
-        <View style={styles.headerButtons}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.push("/evenements")}
-            activeOpacity={0.7}
+    <View style={styles.container}>
+      <StatusBar barStyle="light" translucent backgroundColor="transparent" />
+      {/* Fixed Header Buttons */}
+      <View style={styles.headerButtons}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.push("/evenements")}
+          activeOpacity={0.7}
+        >
+          <LinearGradient
+            colors={["#FFFFFF", "#F9FAFB"]}
+            style={styles.headerButtonGradient}
           >
-            <LinearGradient
-              colors={['#FFFFFF', '#F9FAFB']}
-              style={styles.headerButtonGradient}
-            >
-              <Ionicons name="chevron-back" size={24} color="#111827" />
-            </LinearGradient>
-          </TouchableOpacity>
+            <Ionicons name="chevron-back" size={24} color="#111827" />
+          </LinearGradient>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.favoriteButton}
-            onPress={toggleFavorite}
-            activeOpacity={0.7}
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={toggleFavorite}
+          activeOpacity={0.7}
+        >
+          <LinearGradient
+            colors={
+              isFavorite ? ["#FEE2E2", "#FECACA"] : ["#FFFFFF", "#F9FAFB"]
+            }
+            style={styles.headerButtonGradient}
           >
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={24}
+              color={isFavorite ? "#EF4444" : "#111827"}
+            />
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero Image */}
+        <View style={styles.heroContainer}>
+          <Image source={{ uri: event.image }} style={styles.heroImage} />
+          <LinearGradient
+            colors={["transparent", "rgba(0, 0, 0, 0.6)"]}
+            style={styles.heroGradient}
+          />
+        </View>
+
+        {/* Content */}
+        <View style={styles.content}>
+          <Text style={styles.title}>{event.title}</Text>
+
+          {/* Badges */}
+          <View style={styles.badgesContainer}>
             <LinearGradient
-              colors={isFavorite ? ['#FEE2E2', '#FECACA'] : ['#FFFFFF', '#F9FAFB']}
-              style={styles.headerButtonGradient}
+              colors={["#FFF7ED", "#FFEDD5"]}
+              style={styles.typeBadge}
+            >
+              <View style={styles.typeDot} />
+              <Text style={styles.typeBadgeText}>{event.type}</Text>
+            </LinearGradient>
+            <View
+              style={[
+                styles.priceBadge,
+                event.price === "Gratuit"
+                  ? styles.gratuitBadge
+                  : styles.payantBadge,
+              ]}
             >
               <Ionicons
-                name={isFavorite ? "heart" : "heart-outline"}
-                size={24}
-                color={isFavorite ? "#EF4444" : "#111827"}
-              />
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Hero Image */}
-          <View style={styles.heroContainer}>
-            <Image source={{ uri: event.image }} style={styles.heroImage} />
-            <LinearGradient
-              colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
-              style={styles.heroGradient}
-            />
-          </View>
-
-          {/* Content */}
-          <View style={styles.content}>
-            <Text style={styles.title}>{event.title}</Text>
-
-            {/* Badges */}
-            <View style={styles.badgesContainer}>
-              <LinearGradient
-                colors={['#FFF7ED', '#FFEDD5']}
-                style={styles.typeBadge}
-              >
-                <View style={styles.typeDot} />
-                <Text style={styles.typeBadgeText}>{event.type}</Text>
-              </LinearGradient>
-              <View
-                style={[
-                  styles.priceBadge,
+                name={
                   event.price === "Gratuit"
-                    ? styles.gratuitBadge
-                    : styles.payantBadge,
+                    ? "checkmark-circle"
+                    : "cash-outline"
+                }
+                size={14}
+                color={event.price === "Gratuit" ? "#059669" : "#EA580C"}
+              />
+              <Text
+                style={[
+                  styles.priceBadgeText,
+                  event.price === "Gratuit"
+                    ? styles.gratuitText
+                    : styles.payantText,
                 ]}
               >
-                <Ionicons 
-                  name={event.price === "Gratuit" ? "checkmark-circle" : "cash-outline"} 
-                  size={14} 
-                  color={event.price === "Gratuit" ? "#059669" : "#EA580C"}
-                />
-                <Text
-                  style={[
-                    styles.priceBadgeText,
-                    event.price === "Gratuit"
-                      ? styles.gratuitText
-                      : styles.payantText,
-                  ]}
-                >
-                  {event.price}
-                </Text>
-              </View>
+                {event.price}
+              </Text>
             </View>
+          </View>
 
-            {/* Date & Time */}
-            <View style={styles.infoCard}>
+          {/* Date & Time */}
+          <View style={styles.infoCard}>
+            <LinearGradient
+              colors={["#FFE8D6", "#FFD4B3"]}
+              style={styles.iconBox}
+            >
+              <Ionicons name="calendar-outline" size={24} color="#FF6600" />
+            </LinearGradient>
+            <View style={styles.infoText}>
+              <Text style={styles.infoTitle}>{event.date}</Text>
+              <Text style={styles.infoSubtitle}>{event.time}</Text>
+            </View>
+            <View style={styles.infoArrow}>
+              <Ionicons name="time-outline" size={20} color="#9CA3AF" />
+            </View>
+          </View>
+
+          {/* Description */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons
+                name="document-text-outline"
+                size={20}
+                color="#FF6600"
+              />
+              <Text style={styles.sectionTitle}>Description</Text>
+            </View>
+            <View style={styles.descriptionCard}>
+              <Text style={styles.description}>{event.description}</Text>
+            </View>
+          </View>
+
+          {/* Location */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="location-outline" size={20} color="#FF6600" />
+              <Text style={styles.sectionTitle}>Lieu</Text>
+            </View>
+            <View style={styles.locationCard}>
               <LinearGradient
-                colors={['#FFE8D6', '#FFD4B3']}
+                colors={["#EFF6FF", "#DBEAFE"]}
                 style={styles.iconBox}
               >
-                <Ionicons name="calendar-outline" size={24} color="#FF6600" />
+                <Ionicons name="map-outline" size={24} color="#3B82F6" />
               </LinearGradient>
               <View style={styles.infoText}>
-                <Text style={styles.infoTitle}>{event.date}</Text>
-                <Text style={styles.infoSubtitle}>{event.time}</Text>
+                <Text style={styles.infoTitle}>{event.location}</Text>
+                <Text style={styles.infoSubtitle}>
+                  {event.city}, {event.country}
+                </Text>
               </View>
-              <View style={styles.infoArrow}>
-                <Ionicons name="time-outline" size={20} color="#9CA3AF" />
-              </View>
+              <TouchableOpacity style={styles.mapButton}>
+                <Ionicons name="navigate-outline" size={20} color="#3B82F6" />
+              </TouchableOpacity>
             </View>
-
-            {/* Description */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Ionicons name="document-text-outline" size={20} color="#FF6600" />
-                <Text style={styles.sectionTitle}>Description</Text>
-              </View>
-              <View style={styles.descriptionCard}>
-                <Text style={styles.description}>{event.description}</Text>
-              </View>
-            </View>
-
-            {/* Location */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Ionicons name="location-outline" size={20} color="#FF6600" />
-                <Text style={styles.sectionTitle}>Lieu</Text>
-              </View>
-              <View style={styles.locationCard}>
-                <LinearGradient
-                  colors={['#EFF6FF', '#DBEAFE']}
-                  style={styles.iconBox}
-                >
-                  <Ionicons name="map-outline" size={24} color="#3B82F6" />
-                </LinearGradient>
-                <View style={styles.infoText}>
-                  <Text style={styles.infoTitle}>{event.location}</Text>
-                  <Text style={styles.infoSubtitle}>
-                    {event.city}, {event.country}
-                  </Text>
-                </View>
-                <TouchableOpacity style={styles.mapButton}>
-                  <Ionicons name="navigate-outline" size={20} color="#3B82F6" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Organizer */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Ionicons name="people-outline" size={20} color="#FF6600" />
-                <Text style={styles.sectionTitle}>Organisateur</Text>
-              </View>
-              <View style={styles.organizerContainer}>
-                <LinearGradient
-                  colors={['#003D6B', '#005A8F']}
-                  style={styles.organizerIcon}
-                >
-                  <Ionicons name="business" size={24} color="#fff" />
-                </LinearGradient>
-                <View style={styles.organizerText}>
-                  <Text style={styles.organizerTitle}>{event.organizer}</Text>
-                  <Text style={styles.organizerSubtitle}>
-                    {event.organizerTagline}
-                  </Text>
-                </View>
-                <TouchableOpacity style={styles.contactButton}>
-                  <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={{ height: 100 }} />
           </View>
-        </ScrollView>
 
-        {/* Register Button */}
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.registerButton}
-            onPress={handleRegister}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#FF7F27', '#FF6600']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.registerGradient}
-            >
-              <Text style={styles.registerButtonText}>S&apos;inscrire</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
-            </LinearGradient>
-          </TouchableOpacity>
+          {/* Organizer */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="people-outline" size={20} color="#FF6600" />
+              <Text style={styles.sectionTitle}>Organisateur</Text>
+            </View>
+            <View style={styles.organizerContainer}>
+              <LinearGradient
+                colors={["#003D6B", "#005A8F"]}
+                style={styles.organizerIcon}
+              >
+                <Ionicons name="business" size={24} color="#fff" />
+              </LinearGradient>
+              <View style={styles.organizerText}>
+                <Text style={styles.organizerTitle}>{event.organizer}</Text>
+                <Text style={styles.organizerSubtitle}>
+                  {event.organizerTagline}
+                </Text>
+              </View>
+              <TouchableOpacity style={styles.contactButton}>
+                <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={{ height: 100 }} />
         </View>
+      </ScrollView>
+
+      {/* Register Button */}
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.registerButton}
+          onPress={handleRegister}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={["#FF7F27", "#FF6600"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.registerGradient}
+          >
+            <Text style={styles.registerButtonText}>S&apos;inscrire</Text>
+            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
-    </SafeAreaWrapper>
+    </View>
   );
 }
 
@@ -257,7 +266,7 @@ const styles = StyleSheet.create({
   },
   headerButtons: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 15 : 30,
+    top: Platform.OS === "ios" ? 60 : 60,
     left: 0,
     right: 0,
     flexDirection: "row",
@@ -269,7 +278,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
@@ -280,7 +289,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
@@ -288,21 +297,21 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   headerButtonGradient: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
   },
   heroContainer: {
     height: 300,
-    position: 'relative',
+    position: "relative",
   },
   heroImage: {
     width: "100%",
     height: "100%",
   },
   heroGradient: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
@@ -335,8 +344,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   typeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
@@ -354,8 +363,8 @@ const styles = StyleSheet.create({
     color: "#FF6600",
   },
   priceBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
@@ -415,22 +424,22 @@ const styles = StyleSheet.create({
   infoSubtitle: {
     fontSize: 14,
     color: "#6B7280",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   infoArrow: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
   },
   section: {
     marginBottom: 24,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     marginBottom: 12,
   },
@@ -440,17 +449,17 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
   descriptionCard: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: "#F9FAFB",
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: "#F3F4F6",
   },
   description: {
     fontSize: 15,
     lineHeight: 24,
     color: "#6B7280",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   locationCard: {
     flexDirection: "row",
@@ -465,15 +474,15 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: "#F3F4F6",
   },
   mapButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#EFF6FF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#EFF6FF",
+    justifyContent: "center",
+    alignItems: "center",
   },
   organizerContainer: {
     flexDirection: "row",
@@ -488,7 +497,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: "#F3F4F6",
   },
   organizerIcon: {
     width: 52,
@@ -514,15 +523,15 @@ const styles = StyleSheet.create({
   organizerSubtitle: {
     fontSize: 14,
     color: "#6B7280",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   contactButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
   },
   footer: {
     position: "absolute",
@@ -541,7 +550,7 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     borderRadius: 24,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: "#FF6600",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -571,26 +580,26 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 20,
   },
   errorText: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     color: "#374151",
     marginBottom: 24,
   },
   errorButton: {
-    backgroundColor: '#FF6600',
+    backgroundColor: "#FF6600",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 20,
   },
   errorButtonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });
