@@ -4,7 +4,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SafeAreaWrapper({ children, style }) {
   return (
-    <SafeAreaView style={[styles.container, style]} edges={["top", "left", "right",]}>
+    <SafeAreaView
+      style={[styles.container, style]}
+      edges={["top", "left", "right"]}
+    >
       {children}
     </SafeAreaView>
   );
@@ -15,4 +18,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
