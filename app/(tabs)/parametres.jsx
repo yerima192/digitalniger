@@ -29,7 +29,7 @@ export default function ParametresScreen() {
 
   return (
     <SafeAreaWrapper>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Header
           title="Paramètres"
@@ -174,7 +174,11 @@ export default function ParametresScreen() {
 
           <View style={styles.card}>
             {/* Aide et support */}
-            <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
+            <TouchableOpacity
+              onPress={() => router.push("/aide-support")}
+              style={styles.settingRow}
+              activeOpacity={0.7}
+            >
               <View style={styles.settingLeft}>
                 <LinearGradient
                   colors={["#F0FDF4", "#DCFCE7"]}
@@ -201,7 +205,11 @@ export default function ParametresScreen() {
             <View style={styles.separator} />
 
             {/* Politique de confidentialité */}
-            <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
+            <TouchableOpacity
+              onPress={() => router.push("/politique-confidentialite")}
+              style={styles.settingRow}
+              activeOpacity={0.7}
+            >
               <View style={styles.settingLeft}>
                 <LinearGradient
                   colors={["#FDF4FF", "#FAE8FF"]}
@@ -259,17 +267,13 @@ export default function ParametresScreen() {
         </View>
 
         {/* Espacement en bas */}
-        <View style={{ height: 10 }} />
+        <View style={{ height: 30 }} />
       </ScrollView>
     </SafeAreaWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    // backgroundColor: "#FFFFFF",
-  },
   section: {
     marginTop: 24,
     paddingHorizontal: 16,
