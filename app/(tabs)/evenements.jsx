@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import Header from "../../components/Header";
 import { eventsData } from "../../data/eventsData";
@@ -36,16 +36,18 @@ export default function EvenementsScreen() {
   const renderEventCard = ({ item }) => (
     <TouchableOpacity
       style={styles.eventCard}
-      onPress={() => router.push({
-        pathname: "/event-detail",
-        params: { eventId: item.id }
-      })}
+      onPress={() =>
+        router.push({
+          pathname: "/event-detail",
+          params: { eventId: item.id },
+        })
+      }
       activeOpacity={0.7}
     >
       <View style={styles.eventImageContainer}>
         <Image source={{ uri: item.image }} style={styles.eventImage} />
         <LinearGradient
-          colors={['transparent', 'rgba(0, 0, 0, 0.3)']}
+          colors={["transparent", "rgba(0, 0, 0, 0.3)"]}
           style={styles.imageGradient}
         />
         <View
@@ -127,25 +129,37 @@ export default function EvenementsScreen() {
               onChangeText={setSearchQuery}
               placeholderTextColor="#9CA3AF"
             />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+              </TouchableOpacity>
+            )}
           </View>
           <TouchableOpacity
-            style={[styles.filterButton, showFilters && styles.filterButtonActive]}
+            style={[
+              styles.filterButton,
+              showFilters && styles.filterButtonActive,
+            ]}
             onPress={() => setShowFilters(!showFilters)}
             activeOpacity={0.7}
           >
             <LinearGradient
-              colors={showFilters ? ['#FF7F27', '#FF6600'] : ['#FFFFFF', '#FFFFFF']}
+              colors={
+                showFilters ? ["#FF7F27", "#FF6600"] : ["#FFFFFF", "#FFFFFF"]
+              }
               style={styles.filterButtonGradient}
             >
-              <Ionicons 
-                name="options-outline" 
-                size={20} 
-                color={showFilters ? "#FFFFFF" : "#111827"} 
+              <Ionicons
+                name="options-outline"
+                size={20}
+                color={showFilters ? "#FFFFFF" : "#111827"}
               />
-              <Text style={[
-                styles.filterButtonText,
-                showFilters && styles.filterButtonTextActive
-              ]}>
+              <Text
+                style={[
+                  styles.filterButtonText,
+                  showFilters && styles.filterButtonTextActive,
+                ]}
+              >
                 Filtres
               </Text>
             </LinearGradient>
@@ -245,25 +259,25 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: "#F3F4F6",
   },
   searchIconCircle: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F9FAFB',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#F9FAFB",
+    justifyContent: "center",
+    alignItems: "center",
   },
   searchInput: {
     flex: 1,
     fontSize: 12,
     color: "#111827",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   filterButton: {
     borderRadius: 24,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -289,7 +303,11 @@ const styles = StyleSheet.create({
   filterButtonTextActive: {
     color: "#FFFFFF",
   },
-  filtersPanel: { 
+
+
+
+
+  filtersPanel: {
     marginTop: 16,
     padding: 16,
     backgroundColor: "#FFFFFF",
@@ -300,14 +318,14 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: "#F3F4F6",
   },
   filterSection: {
     marginBottom: 12,
   },
   filterLabelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     marginBottom: 10,
   },
@@ -327,16 +345,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9FAFB",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
   },
   filterBtnActive: {
     backgroundColor: "#FFF7ED",
-    borderColor: '#FF6600',
+    borderColor: "#FF6600",
   },
   filterBtnText: {
     fontSize: 14,
     color: "#6B7280",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   filterBtnTextActive: {
     color: "#FF6600",
@@ -356,7 +374,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: "#F3F4F6",
   },
   eventImageContainer: {
     position: "relative",
@@ -367,7 +385,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   imageGradient: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
@@ -406,8 +424,8 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   typeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     marginBottom: 8,
   },
@@ -421,7 +439,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
     color: "#FF6600",
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   eventTitle: {
@@ -446,19 +464,19 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#F9FAFB',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#F9FAFB",
+    justifyContent: "center",
+    alignItems: "center",
   },
   eventDate: {
     fontSize: 14,
     color: "#6B7280",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   eventLocation: {
     fontSize: 14,
     color: "#6B7280",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   emptyContainer: {
     alignItems: "center",
@@ -469,9 +487,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 16,
   },
   emptyText: {
@@ -484,6 +502,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#9CA3AF",
     marginTop: 6,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

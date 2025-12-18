@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { eventsData } from "../data/eventsData";
 // import SafeAreaWrapper from "../components/SafeAreaWrapper";
+// import SafeAreaWrapper from "../components/SafeAreaWrapper";
 
 export default function EventDetailScreen() {
   const router = useRouter();
@@ -55,6 +56,7 @@ export default function EventDetailScreen() {
   };
 
   return (
+    // <SafeAreaWrapper>
     <View style={styles.container}>
       <StatusBar barStyle="light" translucent backgroundColor="transparent" />
       {/* Fixed Header Buttons */}
@@ -230,7 +232,7 @@ export default function EventDetailScreen() {
             </View>
           </View>
 
-          <View style={{ height: 100 }} />
+          {/* <View style={{ height: 100 }} /> */}
         </View>
       </ScrollView>
 
@@ -253,6 +255,7 @@ export default function EventDetailScreen() {
         </TouchableOpacity>
       </View>
     </View>
+    // </SafeAreaWrapper>
   );
 }
 
