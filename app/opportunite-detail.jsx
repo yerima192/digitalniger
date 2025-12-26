@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Image,
   TouchableOpacity,
   StatusBar,
   Linking,
@@ -14,24 +13,24 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { eventsData } from "../data/eventsData";
+import { opportunitesData } from "../data/opportunitesData";
 import SafeAreaWrapper from "../components/SafeAreaWrapper";
 
-export default function EventDetailScreen() {
+export default function OpportuniteDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const event = eventsData.find((e) => e.id === params.eventId);
+  const opportunite = opportunitesData.find((o) => o.id === params.opportuniteId);
 
-  if (!event) {
+  if (!opportunite) {
     return (
       <View style={styles.errorContainer}>
         <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
         <View style={styles.errorIconCircle}>
           <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
         </View>
-        <Text style={styles.errorText}>Événement introuvable</Text>
+        <Text style={styles.errorText}>Opportunité introuvable</Text>
         <TouchableOpacity
           style={styles.errorButton}
           onPress={() => router.back()}
@@ -42,10 +41,10 @@ export default function EventDetailScreen() {
     );
   }
 
-  const handleRegister = () => {
-    if (event.registrationLink) {
-      Linking.openURL(event.registrationLink).catch(() => {
-        Alert.alert("Erreur", "Impossible d'ouvrir le lien d'inscription");
+  const handleVisitSite = () => {
+    if (opportunite.lien) {
+      Linking.openURL(opportunite.lien).catch(() => {
+        Alert.alert("Erreur", "Impossible d'ouvrir le lien");
       });
     }
   };
@@ -61,7 +60,7 @@ export default function EventDetailScreen() {
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.push("/evenements")}
+            onPress={() => router.push("/opportunites")}
             activeOpacity={0.7}
           >
             <LinearGradient
@@ -96,18 +95,20 @@ export default function EventDetailScreen() {
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
         >
-          {/* Hero Image */}
+          {/* Hero Section */}
           <View style={styles.heroContainer}>
-            <Image source={{ uri: event.image }} style={styles.heroImage} />
             <LinearGradient
-              colors={["transparent", "rgba(0, 0, 0, 0.6)"]}
+              colors={[`${opportunite.color}30`, `${opportunite.color}10`]}
               style={styles.heroGradient}
             />
+            <View style={[styles.heroIcon, { backgroundColor: `${opportunite.color}20` }]}>
+              <Ionicons name={opportunite.icon} size={64} color={opportunite.color} />
+            </View>
           </View>
 
           {/* Content */}
           <View style={styles.content}>
-            <Text style={styles.title}>{event.title}</Text>
+            <Text style={styles.title}>{opportunite.titre}</Text>
 
             {/* Badges */}
             <View style={styles.badgesContainer}>
@@ -115,53 +116,31 @@ export default function EventDetailScreen() {
                 colors={["#FFF7ED", "#FFEDD5"]}
                 style={styles.typeBadge}
               >
-                <View style={styles.typeDot} />
-                <Text style={styles.typeBadgeText}>{event.type}</Text>
-              </LinearGradient>
-              <View
-                style={[
-                  styles.priceBadge,
-                  event.price === "Gratuit"
-                    ? styles.gratuitBadge
-                    : styles.payantBadge,
-                ]}
-              >
-                <Ionicons
-                  name={
-                    event.price === "Gratuit"
-                      ? "checkmark-circle"
-                      : "cash-outline"
-                  }
-                  size={14}
-                  color={event.price === "Gratuit" ? "#059669" : "#EA580C"}
-                />
-                <Text
-                  style={[
-                    styles.priceBadgeText,
-                    event.price === "Gratuit"
-                      ? styles.gratuitText
-                      : styles.payantText,
-                  ]}
-                >
-                  {event.price}
+                <View style={[styles.typeDot, { backgroundColor: opportunite.color }]} />
+                <Text style={[styles.typeBadgeText, { color: opportunite.color }]}>
+                  {opportunite.type}
                 </Text>
+              </LinearGradient>
+              <View style={styles.categorieBadge}>
+                <Ionicons name="albums" size={12} color="#6B7280" />
+                <Text style={styles.categorieBadgeText}>{opportunite.categorie}</Text>
               </View>
             </View>
 
-            {/* Date & Time */}
+            {/* Deadline */}
             <View style={styles.infoCard}>
               <LinearGradient
-                colors={["#FFE8D6", "#FFD4B3"]}
+                colors={["#FEE2E2", "#FECACA"]}
                 style={styles.iconBox}
               >
-                <Ionicons name="calendar-outline" size={24} color="#FF6600" />
+                <Ionicons name="time-outline" size={24} color="#DC2626" />
               </LinearGradient>
               <View style={styles.infoText}>
-                <Text style={styles.infoTitle}>{event.date}</Text>
-                <Text style={styles.infoSubtitle}>{event.time}</Text>
+                <Text style={styles.infoLabel}>Date limite</Text>
+                <Text style={styles.infoTitle}>{opportunite.deadline}</Text>
               </View>
-              <View style={styles.infoArrow}>
-                <Ionicons name="time-outline" size={20} color="#9CA3AF" />
+              <View style={styles.urgentBadge}>
+                <Text style={styles.urgentText}>Urgent</Text>
               </View>
             </View>
 
@@ -176,15 +155,146 @@ export default function EventDetailScreen() {
                 <Text style={styles.sectionTitle}>Description</Text>
               </View>
               <View style={styles.descriptionCard}>
-                <Text style={styles.description}>{event.description}</Text>
+                <Text style={styles.description}>{opportunite.description}</Text>
               </View>
             </View>
 
-            {/* Location */}
+            {/* Informations clés */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Ionicons
+                  name="information-circle-outline"
+                  size={20}
+                  color="#FF6600"
+                />
+                <Text style={styles.sectionTitle}>Informations clés</Text>
+              </View>
+
+              {/* Date début */}
+              <View style={styles.infoRow}>
+                <LinearGradient
+                  colors={["#DBEAFE", "#BFDBFE"]}
+                  style={styles.smallIconBox}
+                >
+                  <Ionicons name="calendar" size={20} color="#3B82F6" />
+                </LinearGradient>
+                <View style={styles.infoRowText}>
+                  <Text style={styles.infoRowLabel}>Date de début</Text>
+                  <Text style={styles.infoRowValue}>{opportunite.dateDebut}</Text>
+                </View>
+              </View>
+
+              {/* Durée */}
+              <View style={styles.infoRow}>
+                <LinearGradient
+                  colors={["#E9D5FF", "#D8B4FE"]}
+                  style={styles.smallIconBox}
+                >
+                  <Ionicons name="hourglass" size={20} color="#9333EA" />
+                </LinearGradient>
+                <View style={styles.infoRowText}>
+                  <Text style={styles.infoRowLabel}>Durée</Text>
+                  <Text style={styles.infoRowValue}>{opportunite.duree}</Text>
+                </View>
+              </View>
+
+              {/* Montant */}
+              {opportunite.montant && (
+                <View style={styles.infoRow}>
+                  <LinearGradient
+                    colors={["#D1FAE5", "#A7F3D0"]}
+                    style={styles.smallIconBox}
+                  >
+                    <Ionicons name="cash" size={20} color="#059669" />
+                  </LinearGradient>
+                  <View style={styles.infoRowText}>
+                    <Text style={styles.infoRowLabel}>Montant</Text>
+                    <Text style={styles.infoRowValue}>{opportunite.montant}</Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Nombre de places */}
+              {opportunite.nombrePlaces && (
+                <View style={styles.infoRow}>
+                  <LinearGradient
+                    colors={["#FED7AA", "#FDBA74"]}
+                    style={styles.smallIconBox}
+                  >
+                    <Ionicons name="people" size={20} color="#EA580C" />
+                  </LinearGradient>
+                  <View style={styles.infoRowText}>
+                    <Text style={styles.infoRowLabel}>Places disponibles</Text>
+                    <Text style={styles.infoRowValue}>{opportunite.nombrePlaces}</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+
+            {/* Critères */}
+            {opportunite.criteres && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Ionicons name="checkmark-circle-outline" size={20} color="#FF6600" />
+                  <Text style={styles.sectionTitle}>Critères d&apos;éligibilité</Text>
+                </View>
+                <View style={styles.listCard}>
+                  {opportunite.criteres.map((critere, index) => (
+                    <View key={index} style={styles.listItem}>
+                      <View style={styles.bulletPoint}>
+                        <Ionicons name="checkmark" size={16} color="#059669" />
+                      </View>
+                      <Text style={styles.listItemText}>{critere}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Avantages */}
+            {opportunite.avantages && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Ionicons name="star-outline" size={20} color="#FF6600" />
+                  <Text style={styles.sectionTitle}>Avantages</Text>
+                </View>
+                <View style={styles.listCard}>
+                  {opportunite.avantages.map((avantage, index) => (
+                    <View key={index} style={styles.listItem}>
+                      <View style={styles.bulletPoint}>
+                        <Ionicons name="star" size={16} color="#F59E0B" />
+                      </View>
+                      <Text style={styles.listItemText}>{avantage}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Organisateur */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Ionicons name="business-outline" size={20} color="#FF6600" />
+                <Text style={styles.sectionTitle}>Organisateur</Text>
+              </View>
+              <View style={styles.organizerCard}>
+                <View style={[styles.organizerIcon, { backgroundColor: `${opportunite.color}20` }]}>
+                  <Ionicons name="business" size={28} color={opportunite.color} />
+                </View>
+                <View style={styles.organizerText}>
+                  <Text style={styles.organizerTitle}>{opportunite.organisation}</Text>
+                  <Text style={styles.organizerSubtitle}>
+                    {opportunite.organisationTagline}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Localisation */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Ionicons name="location-outline" size={20} color="#FF6600" />
-                <Text style={styles.sectionTitle}>Lieu</Text>
+                <Text style={styles.sectionTitle}>Localisation</Text>
               </View>
               <View style={styles.locationCard}>
                 <LinearGradient
@@ -194,61 +304,30 @@ export default function EventDetailScreen() {
                   <Ionicons name="map-outline" size={24} color="#3B82F6" />
                 </LinearGradient>
                 <View style={styles.infoText}>
-                  <Text style={styles.infoTitle}>{event.location}</Text>
-                  <Text style={styles.infoSubtitle}>
-                    {event.city}, {event.country}
+                  <Text style={styles.infoTitle}>
+                    {opportunite.ville}, {opportunite.pays}
                   </Text>
                 </View>
-                <TouchableOpacity style={styles.mapButton}>
-                  <Ionicons name="navigate-outline" size={20} color="#3B82F6" />
-                </TouchableOpacity>
               </View>
             </View>
-
-            {/* Organizer */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Ionicons name="people-outline" size={20} color="#FF6600" />
-                <Text style={styles.sectionTitle}>Organisateur</Text>
-              </View>
-              <View style={styles.organizerContainer}>
-                <LinearGradient
-                  colors={["#003D6B", "#005A8F"]}
-                  style={styles.organizerIcon}
-                >
-                  <Ionicons name="business" size={24} color="#fff" />
-                </LinearGradient>
-                <View style={styles.organizerText}>
-                  <Text style={styles.organizerTitle}>{event.organizer}</Text>
-                  <Text style={styles.organizerSubtitle}>
-                    {event.organizerTagline}
-                  </Text>
-                </View>
-                <TouchableOpacity style={styles.contactButton}>
-                  <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* <View style={{ height: 100 }} /> */}
           </View>
         </ScrollView>
 
-        {/* Register Button */}
+        {/* Action Button */}
         <View style={styles.footer}>
           <TouchableOpacity
-            style={styles.registerButton}
-            onPress={handleRegister}
+            style={styles.actionButton}
+            onPress={handleVisitSite}
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={["#FF7F27", "#FF6600"]}
+              colors={[opportunite.color, `${opportunite.color}CC`]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={styles.registerGradient}
+              style={styles.actionGradient}
             >
-              <Text style={styles.registerButtonText}>S&apos;inscrire</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
+              <Text style={styles.actionButtonText}>Visiter le site</Text>
+              <Ionicons name="open-outline" size={20} color="#fff" />
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -304,19 +383,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   heroContainer: {
-    height: 300,
+    height: 250,
     position: "relative",
-  },
-  heroImage: {
-    width: "100%",
-    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   heroGradient: {
     position: "absolute",
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    height: 100,
+    bottom: 0,
+  },
+  heroIcon: {
+    width: 120,
+    height: 120,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 8 },
+    // shadowOpacity: 0.15,
+    // shadowRadius: 16,
+    // elevation: 12,
   },
   content: {
     backgroundColor: "#fff",
@@ -343,6 +432,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     marginBottom: 20,
+    flexWrap: "wrap",
   },
   typeBadge: {
     flexDirection: "row",
@@ -356,36 +446,24 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#FF6600",
   },
   typeBadgeText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#FF6600",
   },
-  priceBadge: {
+  categorieBadge: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
     gap: 4,
+    backgroundColor: "#F3F4F6",
   },
-  gratuitBadge: {
-    backgroundColor: "#D1FAE5",
-  },
-  payantBadge: {
-    backgroundColor: "#FED7AA",
-  },
-  priceBadgeText: {
+  categorieBadgeText: {
     fontSize: 13,
     fontWeight: "700",
-  },
-  gratuitText: {
-    color: "#059669",
-  },
-  payantText: {
-    color: "#EA580C",
+    color: "#6B7280",
   },
   infoCard: {
     flexDirection: "row",
@@ -416,24 +494,28 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
   },
+  infoLabel: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "600",
+    marginBottom: 4,
+    textTransform: "uppercase",
+  },
   infoTitle: {
     fontSize: 16,
     fontWeight: "700",
     color: "#111827",
-    marginBottom: 4,
   },
-  infoSubtitle: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "500",
+  urgentBadge: {
+    backgroundColor: "#DC2626",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
-  infoArrow: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FFF",
-    justifyContent: "center",
-    alignItems: "center",
+  urgentText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFF",
   },
   section: {
     marginBottom: 24,
@@ -462,30 +544,66 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     fontWeight: "500",
   },
-  locationCard: {
+  infoRow: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
     backgroundColor: "#F9FAFB",
-    borderRadius: 20,
+    borderRadius: 16,
     gap: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: "#F3F4F6",
   },
-  mapButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#EFF6FF",
+  smallIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
   },
-  organizerContainer: {
+  infoRowText: {
+    flex: 1,
+  },
+  infoRowLabel: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  infoRowValue: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  listCard: {
+    backgroundColor: "#F9FAFB",
+    padding: 16,
+    borderRadius: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  listItem: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  bulletPoint: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#D1FAE5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  listItemText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  organizerCard: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
@@ -501,16 +619,11 @@ const styles = StyleSheet.create({
     borderColor: "#F3F4F6",
   },
   organizerIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#003D6B",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
   },
   organizerText: {
     flex: 1,
@@ -526,13 +639,20 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     fontWeight: "500",
   },
-  contactButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FFF",
-    justifyContent: "center",
+  locationCard: {
+    flexDirection: "row",
     alignItems: "center",
+    padding: 16,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 20,
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
   },
   footer: {
     position: "absolute",
@@ -549,7 +669,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 12,
   },
-  registerButton: {
+  actionButton: {
     borderRadius: 24,
     overflow: "hidden",
     shadowColor: "#FF6600",
@@ -558,14 +678,14 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  registerGradient: {
+  actionGradient: {
     flexDirection: "row",
     paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
   },
-  registerButtonText: {
+  actionButtonText: {
     fontSize: 17,
     fontWeight: "700",
     color: "#fff",

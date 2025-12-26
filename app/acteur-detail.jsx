@@ -79,8 +79,6 @@ export default function ActeurDetailScreen() {
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        <StatusBar barStyle="light" translucent backgroundColor="transparent" />
-
         {/* Fixed Header Buttons */}
         <View style={styles.headerButtons}>
           <TouchableOpacity
@@ -421,7 +419,7 @@ const styles = StyleSheet.create({
   },
   headerButtons: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 60 : 60,
+    top: Platform.OS === "ios" ? 30 : 30,
     left: 0,
     right: 0,
     flexDirection: "row",
@@ -471,11 +469,9 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   logoContainer: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: '100%',
+    height: '100%',
     backgroundColor: "#fff",
-    padding: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
@@ -485,7 +481,6 @@ const styles = StyleSheet.create({
   logo: {
     width: "100%",
     height: "100%",
-    borderRadius: 62,
   },
   content: {
     backgroundColor: "#fff",
