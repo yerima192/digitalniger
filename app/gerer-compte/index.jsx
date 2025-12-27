@@ -1,8 +1,15 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 import Header from "../../components/Header";
+import { router } from "expo-router";
 
 export default function GererCompteScreen() {
   return (
@@ -25,16 +32,21 @@ export default function GererCompteScreen() {
           </View>
 
           <View style={styles.card}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.row}
               activeOpacity={0.7}
+              onPress={() => router.push("modifier-mes-informations")}
             >
               <View style={styles.left}>
                 <LinearGradient
-                  colors={['#FFE8D6', '#FFD4B3']}
+                  colors={["#FFE8D6", "#FFD4B3"]}
                   style={[styles.iconCircle, { backgroundColor: "#FFE8D6" }]}
                 >
-                  <Ionicons name="person-circle-outline" size={24} color="#FF6600" />
+                  <Ionicons
+                    name="person-circle-outline"
+                    size={24}
+                    color="#FF6600"
+                  />
                 </LinearGradient>
                 <View style={styles.textContainer}>
                   <Text style={styles.text}>Modifier mes informations</Text>
@@ -48,16 +60,21 @@ export default function GererCompteScreen() {
 
             <View style={styles.separator} />
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.row}
               activeOpacity={0.7}
+              onPress={() => router.push("changer-mon-mot-de-passe")}
             >
               <View style={styles.left}>
                 <LinearGradient
-                  colors={['#E8F0FF', '#D4E4FF']}
+                  colors={["#E8F0FF", "#D4E4FF"]}
                   style={[styles.iconCircle, { backgroundColor: "#E8F0FF" }]}
                 >
-                  <Ionicons name="lock-closed-outline" size={24} color="#3366FF" />
+                  <Ionicons
+                    name="lock-closed-outline"
+                    size={24}
+                    color="#3366FF"
+                  />
                 </LinearGradient>
                 <View style={styles.textContainer}>
                   <Text style={styles.text}>Changer mon mot de passe</Text>
@@ -79,7 +96,7 @@ export default function GererCompteScreen() {
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoTitle}>Protégez vos données</Text>
             <Text style={styles.infoText}>
-              Vos informations personnelles sont sécurisées et chiffrées. 
+              Vos informations personnelles sont sécurisées et chiffrées.
               Changez régulièrement votre mot de passe.
             </Text>
           </View>
@@ -89,20 +106,21 @@ export default function GererCompteScreen() {
         <View style={styles.dangerSection}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleLine} />
-            <Text style={[styles.sectionTitle, { color: '#DC2626' }]}>Zone dangereuse</Text>
+            <Text style={[styles.sectionTitle, { color: "#DC2626" }]}>
+              Zone dangereuse
+            </Text>
             <View style={styles.sectionTitleLine} />
           </View>
 
-          <TouchableOpacity 
-            style={styles.dangerButton}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity style={styles.dangerButton} activeOpacity={0.7}>
             <View style={styles.dangerButtonContent}>
               <View style={styles.dangerIconCircle}>
                 <Ionicons name="trash-outline" size={24} color="#DC2626" />
               </View>
               <View style={styles.dangerTextContainer}>
-                <Text style={styles.dangerButtonText}>Supprimer mon compte</Text>
+                <Text style={styles.dangerButtonText}>
+                  Supprimer mon compte
+                </Text>
                 <Text style={styles.dangerButtonSubtext}>
                   Cette action est irréversible
                 </Text>
@@ -130,22 +148,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
     gap: 12,
   },
   sectionTitleLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: "#E5E7EB",
   },
   sectionTitle: {
     fontSize: 15,
     fontWeight: "700",
     color: "#374151",
     letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   card: {
     backgroundColor: "#FFFFFF",
@@ -161,7 +179,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: "#F3F4F6",
   },
   row: {
     flexDirection: "row",
@@ -208,26 +226,26 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
   },
   separator: {
     height: 1,
     backgroundColor: "#F3F4F6",
     marginLeft: 66,
   },
-  
+
   // Info Card
   infoCard: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginHorizontal: 16,
     marginTop: 20,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: "#EFF6FF",
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#DBEAFE',
+    borderColor: "#DBEAFE",
     shadowColor: "#3B82F6",
     shadowOffset: {
       width: 0,
@@ -241,9 +259,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: '#DBEAFE',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#DBEAFE",
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 12,
   },
   infoTextContainer: {
@@ -251,31 +269,31 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#1E40AF',
+    fontWeight: "700",
+    color: "#1E40AF",
     marginBottom: 4,
   },
   infoText: {
     fontSize: 13,
-    color: '#3B82F6',
+    color: "#3B82F6",
     lineHeight: 18,
-    fontWeight: '500',
+    fontWeight: "500",
   },
-  
+
   // Danger Section
   dangerSection: {
     marginTop: 32,
     paddingHorizontal: 16,
   },
   dangerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1.5,
-    borderColor: '#FEE2E2',
+    borderColor: "#FEE2E2",
     shadowColor: "#DC2626",
     shadowOffset: {
       width: 0,
@@ -286,8 +304,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   dangerButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 14,
     flex: 1,
   },
@@ -295,31 +313,31 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 16,
-    backgroundColor: '#FEE2E2',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#FEE2E2",
+    alignItems: "center",
+    justifyContent: "center",
   },
   dangerTextContainer: {
     flex: 1,
   },
   dangerButtonText: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#DC2626',
+    fontWeight: "700",
+    color: "#DC2626",
     marginBottom: 4,
   },
   dangerButtonSubtext: {
     fontSize: 13,
-    color: '#F87171',
-    fontWeight: '500',
+    color: "#F87171",
+    fontWeight: "500",
   },
   dangerChevronCircle: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#FEE2E2',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#FEE2E2",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 
@@ -350,7 +368,7 @@ const styles = StyleSheet.create({
 //           </View>
 
 //           <View style={styles.card}>
-//             <TouchableOpacity 
+//             <TouchableOpacity
 //               style={styles.row}
 //               activeOpacity={0.7}
 //             >
@@ -373,7 +391,7 @@ const styles = StyleSheet.create({
 
 //             <View style={styles.separator} />
 
-//             <TouchableOpacity 
+//             <TouchableOpacity
 //               style={styles.row}
 //               activeOpacity={0.7}
 //             >
@@ -404,7 +422,7 @@ const styles = StyleSheet.create({
 //           <View style={styles.infoTextContainer}>
 //             <Text style={styles.infoTitle}>Protégez vos données</Text>
 //             <Text style={styles.infoText}>
-//               Vos informations personnelles sont sécurisées et chiffrées. 
+//               Vos informations personnelles sont sécurisées et chiffrées.
 //               Changez régulièrement votre mot de passe.
 //             </Text>
 //           </View>
@@ -513,7 +531,7 @@ const styles = StyleSheet.create({
 //     backgroundColor: "#F3F4F6",
 //     marginLeft: 66,
 //   },
-  
+
 //   // Info Card
 //   infoCard: {
 //     flexDirection: 'row',

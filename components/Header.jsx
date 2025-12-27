@@ -37,6 +37,7 @@ export default function Header({ title, subtitle, badgeCount, showBack = false }
               <TouchableOpacity 
                 style={styles.iconButton}
                 activeOpacity={0.7}
+                onPress={() => router.push('user-notifications')}
               >
                 <View style={styles.iconWrapper}>
                   <Ionicons name="notifications-outline" size={22} color="#1F2937" />
@@ -53,6 +54,7 @@ export default function Header({ title, subtitle, badgeCount, showBack = false }
               <TouchableOpacity 
                 style={styles.iconButton}
                 activeOpacity={0.7}
+                onPress={() => router.push('user-profil')}
               >
                 <View style={[styles.iconWrapper, styles.profileWrapper]}>
                   <Ionicons name="person-circle-outline" size={26} color="#1F2937" />
