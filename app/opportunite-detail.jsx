@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  StatusBar,
   Linking,
   Alert,
   Platform,
@@ -26,7 +25,6 @@ export default function OpportuniteDetailScreen() {
   if (!opportunite) {
     return (
       <View style={styles.errorContainer}>
-        <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
         <View style={styles.errorIconCircle}>
           <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
         </View>

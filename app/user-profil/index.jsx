@@ -87,7 +87,7 @@ export default function ProfilScreen() {
             <View style={styles.avatarContainer}>
               <View style={styles.avatarCircle}>
                 <Image
-                  source={{ uri: "https://i.pravatar.cc/150?img=12" }}
+                  source={require("../../assets/images/profil.jpg")}
                   style={styles.avatar}
                 />
                 <TouchableOpacity style={styles.editAvatarButton} activeOpacity={0.8}>
@@ -98,8 +98,8 @@ export default function ProfilScreen() {
 
             {/* Info */}
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>Amadou Moussa</Text>
-              <Text style={styles.profileEmail}>amadou.moussa@email.com</Text>
+              <Text style={styles.profileName}>Soumana Abassa</Text>
+              <Text style={styles.profileEmail}>delomodibo@gmail.com</Text>
               <View style={styles.profileBadge}>
                 <Ionicons name="shield-checkmark" size={14} color="#10B981" />
                 <Text style={styles.profileBadgeText}>Compte vérifié</Text>
@@ -110,7 +110,7 @@ export default function ProfilScreen() {
             <TouchableOpacity 
               style={styles.editProfileButton}
               activeOpacity={0.8}
-              onPress={() => router.push("/modifier-informations")}
+              onPress={() => router.push("/modifier-mes-informations")}
             >
               <Ionicons name="create-outline" size={18} color="#FF6600" />
               <Text style={styles.editProfileText}>Modifier</Text>
@@ -493,47 +493,47 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#3B82F6",
   },
-  quickActionsContainer: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  quickActionCard: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  quickActionIconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  quickActionLabel: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#374151",
-    textAlign: "center",
-  },
+  // quickActionsContainer: {
+  //   flexDirection: "row",
+  //   gap: 12,
+  // },
+  // quickActionCard: {
+  //   flex: 1,
+  //   backgroundColor: "#FFFFFF",
+  //   borderRadius: 16,
+  //   padding: 16,
+  //   alignItems: "center",
+  //   shadowColor: "#000",
+  //   shadowOffset: {
+  //     width: 0,
+  //     height: 3,
+  //   },
+  //   shadowOpacity: 0.08,
+  //   shadowRadius: 8,
+  //   elevation: 4,
+  //   borderWidth: 1,
+  //   borderColor: "#F3F4F6",
+  // },
+  // quickActionIconCircle: {
+  //   width: 56,
+  //   height: 56,
+  //   borderRadius: 16,
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  //   marginBottom: 10,
+  //   shadowColor: "#000",
+  //   shadowOffset: {
+  //     width: 0,
+  //     height: 2,
+  //   },
+  //   shadowOpacity: 0.1,
+  //   shadowRadius: 4,
+  //   elevation: 3,
+  // },
+  // quickActionLabel: {
+  //   fontSize: 13,
+  //   fontWeight: "600",
+  //   color: "#374151",
+  //   textAlign: "center",
+  // },
 });

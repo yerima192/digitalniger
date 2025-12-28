@@ -45,11 +45,14 @@ export default function OpportunitesScreen() {
     >
       <View style={styles.oppMain}>
         <View
-          style={[styles.oppIconContainer, { backgroundColor: `${item.color}15` }]}
+          style={[
+            styles.oppIconContainer,
+            { backgroundColor: `${item.color}15` },
+          ]}
         >
           <Ionicons name={item.icon} size={24} color={item.color} />
         </View>
-        
+
         <View style={styles.oppContent}>
           <View style={styles.oppTop}>
             <Text style={[styles.typeText, { color: item.color }]}>
@@ -61,17 +64,17 @@ export default function OpportunitesScreen() {
               </View>
             )}
           </View>
-          
+
           <Text style={styles.oppTitle} numberOfLines={2}>
             {item.titre}
           </Text>
-          
+
           <Text style={styles.oppOrganisme} numberOfLines={1}>
             Par {item.organisation}
           </Text>
         </View>
       </View>
-      
+
       <View style={styles.oppFooter}>
         <View style={styles.oppInfo}>
           <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
@@ -164,7 +167,9 @@ export default function OpportunitesScreen() {
               style={styles.subscribeGradient}
             >
               <Ionicons name="notifications" size={20} color="#FF7F27" />
-              <Text style={styles.subscribeText}>S&apos;abonner aux alertes</Text>
+              <Text style={styles.subscribeText}>
+                S&apos;abonner aux alertes
+              </Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -403,7 +408,7 @@ const styles = StyleSheet.create({
   oppList: {
     padding: 16,
   },
-  
+
   // CARD SIMPLIFIÉE EN MODE LISTE
   oppCard: {
     backgroundColor: "#FFFFFF",
@@ -441,8 +446,8 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   typeText: {
-    fontSize: 10,
-    fontWeight: "700",
+    fontSize: 12.5,
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   montantBadge: {
@@ -452,8 +457,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   montantText: {
-    fontSize: 10,
-    fontWeight: "700",
+    fontSize: 11,
+    fontWeight: "600",
     color: "#059669",
   },
   oppTitle: {
@@ -485,7 +490,7 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     fontWeight: "600",
   },
-  
+
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
