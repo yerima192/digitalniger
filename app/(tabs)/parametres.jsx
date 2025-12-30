@@ -44,7 +44,7 @@ export default function ParametresScreen() {
         onPress: async () => {
           const result = await logout();
           if (result.success) {
-            router.replace("/auth");
+            router.replace("(auth)");
           }
         },
       },

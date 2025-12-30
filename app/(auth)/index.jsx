@@ -10,6 +10,7 @@ import {
   ScrollView,
   Animated,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -293,10 +294,9 @@ export default function AuthScreen() {
         </Text>
       </View>
 
-
       <TouchableOpacity
         style={[
-          styles.submitButton,
+          styles.submitButtonRegister,
           isSubmitting && styles.submitButtonDisabled,
         ]}
         onPress={handleSignup}
@@ -307,7 +307,7 @@ export default function AuthScreen() {
           colors={["#FF7F27", "#FF6600"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          
+          style={styles.submitGradient}
         >
           {isSubmitting ? (
             <ActivityIndicator color="#fff" />
@@ -347,14 +347,18 @@ export default function AuthScreen() {
           {/* Logo et titre */}
           <View style={styles.header}>
             <View style={styles.logoContainer}>
-              <LinearGradient
+              {/* <LinearGradient
                 colors={["#FF7F27", "#FF6600"]}
                 style={styles.logoGradient}
               >
                 <Ionicons name="flag" size={40} color="#fff" />
-              </LinearGradient>
+              </LinearGradient> */}
+              <Image
+                source={require("../../assets/images/logo.png")}
+                style={styles.avatar}
+              />
             </View>
-            <Text style={styles.title}>DIGITAL-NIGER</Text>
+            {/* <Text style={styles.title}>DIGITAL-NIGER</Text> */}
             <Text style={styles.subtitle}>
               Connectez-vous à l&apos;écosystème numérique nigérien
             </Text>
@@ -419,6 +423,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 40,
     paddingBottom: 40,
+  },
+  avatar: {
+    width: 200,
+    height: 100,
   },
 
   // Header
@@ -558,9 +566,19 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
+  submitButtonRegister: {
+    // overflow: "hidden",
+    marginTop: 8,
+    shadowColor: "#FF6600",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
   submitGradient: {
     flexDirection: "row",
     paddingVertical: 16,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
