@@ -60,7 +60,8 @@ export default function HomeScreen() {
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Header
-          title="Bienvenue!"
+          title="Bienvenue !"
+          // title={`Bienvenue, ${user?.nom || "Utilisateur"}!`}
           subtitle="Découvrez l'écosystème tech du Niger"
           badgeCount={44}
         />

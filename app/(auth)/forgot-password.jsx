@@ -1,62 +1,3 @@
-# 🎨 Design System – Couleurs officielles
-
-## Couleurs de marque (Primary)
-- Orange principal : #FF6600
-- Orange secondaire : #FF7F27
-
-## Arrière-plans
-- Background principal : #F9FAFB
-- Surface / Cartes : #FFFFFF
-
-## Textes
-- Texte principal : #111827
-- Texte secondaire : #6B7280
-- Texte subtil / labels : #9CA3AF
-
-## États & Accents
-- Info / liens : #3B82F6
-- Succès / gratuit : #059669
-- Alerte / erreur : #EF4444
-- Bordures : #E5E7EB
-- Background soft : #F3F4F6
-
-## Règles d’utilisation
-- L’orange ( #FF6600 ) est réservé aux actions principales (CTA).
-- Les backgrounds doivent rester neutres (pas d’orange en fond).
-- Les couleurs vert / rouge / bleu sont utilisées uniquement pour des états (succès, erreur, info).
-- Les titres utilisent #111827, les descriptions #6B7280.
-
-
-
-
-
-const tabs = ["Se connecter", "S'inscrire"];
-je veux faire la page auth de mon app sur la même page deux onglets la page connexion onglet 1 page inscription onglet 2. je veux page mot de passe oublié aussi . tu vois la structure de mes dossiers et fichiers donc tu me montre là où je veux mettre la page auth aussi et ça configuration à l'app
-
-
-
-
-
-
-
-
-<!-- Page Mot de passe oublié 👇 -->
-
-// Dans n'importe quel composant
-import { useAuth } from "../context/AuthContext";
-
-function MonComposant() {
-  const { user, isAuthenticated, logout } = useAuth();
-  
-  return (
-    <View>
-      <Text>Bonjour {user?.name}</Text>
-      <Button title="Se déconnecter" onPress={logout} />
-    </View>
-  );
-}
-
-
 import React, { useState } from "react";
 import {
   View,
@@ -67,21 +8,36 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import { useAuth } from "../../context/AuthContext";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
+  const { resetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleResetPassword = () => {
-    // Logique d'envoi d'email de réinitialisation
-    console.log("Reset password for:", email);
-    setEmailSent(true);
+  const handleResetPassword = async () => {
+    if (!email) {
+      alert("Veuillez entrer votre adresse email");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const result = await resetPassword(email);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      setEmailSent(true);
+    } else {
+      alert(result.error || "Erreur lors de l'envoi de l'email");
+    }
   };
 
   return (
@@ -150,9 +106,10 @@ export default function ForgotPasswordScreen() {
               </View>
 
               <TouchableOpacity
-                style={styles.submitButton}
+                style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
                 onPress={handleResetPassword}
                 activeOpacity={0.8}
+                disabled={isSubmitting}
               >
                 <LinearGradient
                   colors={["#FF7F27", "#FF6600"]}
@@ -160,10 +117,16 @@ export default function ForgotPasswordScreen() {
                   end={{ x: 1, y: 0 }}
                   style={styles.submitGradient}
                 >
-                  <Text style={styles.submitButtonText}>
-                    Envoyer le lien de réinitialisation
-                  </Text>
-                  <Ionicons name="arrow-forward" size={20} color="#fff" />
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <>
+                      <Text style={styles.submitButtonText}>
+                        Envoyer le lien de réinitialisation
+                      </Text>
+                      <Ionicons name="arrow-forward" size={20} color="#fff" />
+                    </>
+                  )}
                 </LinearGradient>
               </TouchableOpacity>
             </View>
@@ -436,5 +399,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#6B7280",
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
   },
 });

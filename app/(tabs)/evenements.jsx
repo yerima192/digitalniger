@@ -303,10 +303,6 @@ const styles = StyleSheet.create({
   filterButtonTextActive: {
     color: "#FFFFFF",
   },
-
-
-
-
   filtersPanel: {
     marginTop: 16,
     padding: 16,

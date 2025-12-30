@@ -1,7 +1,15 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from "react-native";
+import React, { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  Animated,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useState } from "react";
 import { useRouter } from "expo-router";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 import Header from "../../components/Header";
@@ -11,20 +19,43 @@ import { opportunitesData } from "../../data/opportunitesData";
 
 export default function FavorisScreen() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("Événements");
-
-  // Simuler des favoris (prendre les 2 premiers de chaque type)
-  const favorisEvents = eventsData.slice(0, 2);
-  const favorisActeurs = acteursData.slice(0, 3);
-  const favorisOpportunites = opportunitesData.slice(0, 2);
-
+  const [activeTab, setActiveTab] = useState(0);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const [tabWidth, setTabWidth] = useState(0);
+  
   const tabs = ["Événements", "Acteurs", "Opportunités"];
 
-  // Render Event Card (comme dans EvenementsScreen)
+// Simuler des favoris (vous pourrez plus tard gérer ça avec un state global ou stockage)
+  const favoriteEvents = eventsData.slice(0, 3);
+  const favoriteActeurs = acteursData.slice(0, 3);
+  const favoriteOpportunites = opportunitesData.slice(0, 3);
+
+  const handleTabChange = (index) => {
+    setActiveTab(index);
+    Animated.spring(slideAnim, {
+      toValue: index,
+      useNativeDriver: true,
+      friction: 8,
+      tension: 40,
+    }).start();
+  };
+
+  const onTabsLayout = (event) => {
+    const { width } = event.nativeEvent.layout;
+    const calculatedTabWidth = (width - 8) / 3; // 8 = padding (4*2)
+    setTabWidth(calculatedTabWidth);
+  };
+
+  // Render Event Card
   const renderEventCard = ({ item }) => (
     <TouchableOpacity
       style={styles.eventCard}
-      onPress={() => router.push({ pathname: "/event-detail", params: { eventId: item.id } })}
+      onPress={() =>
+        router.push({
+          pathname: "/event-detail",
+          params: { eventId: item.id },
+        })
+      }
       activeOpacity={0.7}
     >
       <View style={styles.eventImageContainer}>
@@ -33,11 +64,24 @@ export default function FavorisScreen() {
           colors={["transparent", "rgba(0, 0, 0, 0.3)"]}
           style={styles.imageGradient}
         />
-        <View style={[styles.priceBadge, item.price === "Gratuit" ? styles.gratuitBadge : styles.payantBadge]}>
-          <Text style={[styles.priceBadgeText, item.price === "Gratuit" ? styles.gratuitText : styles.payantText]}>
+        <View
+          style={[
+            styles.priceBadge,
+            item.price === "Gratuit" ? styles.gratuitBadge : styles.payantBadge,
+          ]}
+        >
+          <Text
+            style={[
+              styles.priceBadgeText,
+              item.price === "Gratuit" ? styles.gratuitText : styles.payantText,
+            ]}
+          >
             {item.price}
           </Text>
         </View>
+        <TouchableOpacity style={styles.favoriteIcon}>
+          <Ionicons name="heart" size={20} color="#EF4444" />
+        </TouchableOpacity>
       </View>
       <View style={styles.eventCardContent}>
         <View style={styles.typeContainer}>
@@ -65,11 +109,16 @@ export default function FavorisScreen() {
     </TouchableOpacity>
   );
 
-  // Render Acteur Card (comme dans ActeursScreen)
+  // Render Acteur Card
   const renderActeurCard = ({ item }) => (
     <TouchableOpacity
       style={styles.acteurCard}
-      onPress={() => router.push({ pathname: "/acteur-detail", params: { acteurId: item.id } })}
+      onPress={() =>
+        router.push({
+          pathname: "/acteur-detail",
+          params: { acteurId: item.id },
+        })
+      }
       activeOpacity={0.97}
     >
       <View style={styles.acteurLogoContainer}>
@@ -89,44 +138,59 @@ export default function FavorisScreen() {
           </Text>
         </View>
       </View>
-      <View style={styles.cardArrow}>
-        <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-      </View>
+      <TouchableOpacity style={styles.favoriteIconActeur}>
+        <Ionicons name="heart" size={20} color="#EF4444" />
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 
-  // Render Opportunite Card (comme dans OpportunitesScreen)
+  // Render Opportunite Card
   const renderOpportuniteCard = ({ item }) => (
     <TouchableOpacity
       style={styles.oppCard}
-      onPress={() => router.push({ pathname: "/opportunite-detail", params: { opportuniteId: item.id } })}
+      onPress={() =>
+        router.push({
+          pathname: "/opportunite-detail",
+          params: { opportuniteId: item.id },
+        })
+      }
       activeOpacity={0.7}
     >
-      <View style={styles.oppMain}>
-        <View style={[styles.oppIconContainer, { backgroundColor: `${item.color}15` }]}>
+      <View style={styles.oppHeader}>
+        <View
+          style={[
+            styles.oppIconContainer,
+            { backgroundColor: `${item.color}15` },
+          ]}
+        >
           <Ionicons name={item.icon} size={24} color={item.color} />
         </View>
 
-        <View style={styles.oppContent}>
-          <View style={styles.oppTop}>
-            <Text style={[styles.typeText, { color: item.color }]}>
-              {item.type.toUpperCase()}
-            </Text>
-            {item.montant && (
-              <View style={styles.montantBadge}>
-                <Text style={styles.montantText}>{item.montant}</Text>
-              </View>
-            )}
-          </View>
-
-          <Text style={styles.oppTitle} numberOfLines={2}>
-            {item.titre}
+        <View style={styles.oppHeaderRight}>
+          <Text style={[styles.typeText, { color: item.color }]}>
+            {item.type.toUpperCase()}
           </Text>
-
-          <Text style={styles.oppOrganisme} numberOfLines={1}>
-            Par {item.organisation}
-          </Text>
+          <TouchableOpacity style={styles.favoriteIconOpp}>
+            <Ionicons name="heart" size={18} color="#EF4444" />
+          </TouchableOpacity>
         </View>
+      </View>
+
+      <View style={styles.oppBody}>
+        <Text style={styles.oppTitle} numberOfLines={2}>
+          {item.titre}
+        </Text>
+
+        <Text style={styles.oppOrganisme} numberOfLines={1}>
+          Par {item.organisation}
+        </Text>
+
+        {item.montant && (
+          <View style={styles.montantBadge}>
+            <Ionicons name="cash-outline" size={14} color="#059669" />
+            <Text style={styles.montantText}>{item.montant}</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.oppFooter}>
@@ -139,148 +203,180 @@ export default function FavorisScreen() {
     </TouchableOpacity>
   );
 
-  const getContent = () => {
+  const getTotalCount = () => {
+    return favoriteEvents.length + favoriteActeurs.length + favoriteOpportunites.length;
+  };
+
+  const getCurrentData = () => {
     switch (activeTab) {
-      case "Événements":
-        return (
-          <FlatList
-            data={favorisEvents}
-            renderItem={renderEventCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.eventsList}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <View style={styles.emptyIconCircle}>
-                  <Ionicons name="calendar-outline" size={48} color="#9CA3AF" />
-                </View>
-                <Text style={styles.emptyText}>Aucun événement favori</Text>
-                <Text style={styles.emptySubtext}>
-                  Ajoutez des événements à vos favoris
-                </Text>
-              </View>
-            }
-          />
-        );
-      case "Acteurs":
-        return (
-          <FlatList
-            data={favorisActeurs}
-            renderItem={renderActeurCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.acteursList}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <View style={styles.emptyIconCircle}>
-                  <Ionicons name="business-outline" size={48} color="#9CA3AF" />
-                </View>
-                <Text style={styles.emptyText}>Aucun acteur favori</Text>
-                <Text style={styles.emptySubtext}>
-                  Ajoutez des acteurs à vos favoris
-                </Text>
-              </View>
-            }
-          />
-        );
-      case "Opportunités":
-        return (
-          <FlatList
-            data={favorisOpportunites}
-            renderItem={renderOpportuniteCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.oppList}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <View style={styles.emptyIconCircle}>
-                  <Ionicons name="briefcase-outline" size={48} color="#9CA3AF" />
-                </View>
-                <Text style={styles.emptyText}>Aucune opportunité favorite</Text>
-                <Text style={styles.emptySubtext}>
-                  Ajoutez des opportunités à vos favoris
-                </Text>
-              </View>
-            }
-          />
-        );
+      case 0:
+        return favoriteEvents;
+      case 1:
+        return favoriteActeurs;
+      case 2:
+        return favoriteOpportunites;
+      default:
+        return [];
+    }
+  };
+
+  const renderItem = ({ item }) => {
+    switch (activeTab) {
+      case 0:
+        return renderEventCard({ item });
+      case 1:
+        return renderActeurCard({ item });
+      case 2:
+        return renderOpportuniteCard({ item });
       default:
         return null;
+    }
+  };
+
+  const getEmptyMessage = () => {
+    switch (activeTab) {
+      case 0:
+        return "Aucun événement favori";
+      case 1:
+        return "Aucun acteur favori";
+      case 2:
+        return "Aucune opportunité favorite";
+      default:
+        return "";
     }
   };
 
   return (
     <SafeAreaWrapper>
       <Header
-        title="Mes Favoris"
+        title="Favoris"
         subtitle="Organisez vos éléments préférés"
-        badgeCount={favorisEvents.length + favorisActeurs.length + favorisOpportunites.length}
+        badgeCount={getTotalCount()}
       />
 
-      {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        {tabs.map((tab, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[styles.tab, activeTab === tab && styles.tabActive]}
-            onPress={() => setActiveTab(tab)}
-            activeOpacity={0.7}
-          >
-            {activeTab === tab && <View style={styles.activeIndicator} />}
-            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
-              {tab}
-            </Text>
-          </TouchableOpacity>
-        ))}
+      <View style={styles.container}>
+        {/* Tabs */}
+        <View style={styles.tabsContainer} onLayout={onTabsLayout}>
+          {tabWidth > 0 && (
+            <Animated.View
+              style={[
+                styles.tabActiveBg,
+                {
+                  width: tabWidth,
+                  transform: [
+                    {
+                      translateX: slideAnim.interpolate({
+                        inputRange: [0, 1, 2],
+                        outputRange: [4, tabWidth + 4, tabWidth * 2 + 4],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
+          )}
+
+          {tabs.map((tab, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.tabButton}
+              onPress={() => handleTabChange(index)}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === index && styles.tabTextActive,
+                ]}
+              >
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
-      {/* Content */}
-      {getContent()}
+      {/* Content List */}
+      <FlatList
+        data={getCurrentData()}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconCircle}>
+              <Ionicons name="heart-outline" size={48} color="#9CA3AF" />
+            </View>
+            <Text style={styles.emptyText}>{getEmptyMessage()}</Text>
+            <Text style={styles.emptySubtext}>
+              Ajoutez des favoris en appuyant sur l&apos;icône cœur
+            </Text>
+          </View>
+        }
+      />
     </SafeAreaWrapper>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#F9FAFB",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 16,
+  },
+
+  // Tabs
   tabsContainer: {
     flexDirection: "row",
-    paddingHorizontal: 16,
-    backgroundColor: "#F9FAFB",
-    paddingTop: 20,
-    gap: 8,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: "center",
+    backgroundColor: "#F3F4F6",
+    borderRadius: 30,
+    padding: 4,
     position: "relative",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    marginHorizontal: 4,
   },
-  tabActive: {
-    borderBottomWidth: 0,
-  },
-  activeIndicator: {
+  tabActiveBg: {
     position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 3,
+    top: 4,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "#FF6600",
-    borderRadius: 2,
+    shadowColor: "#FF6600",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  tabButton: {
+    flex: 1,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+    paddingHorizontal: 8,
   },
   tabText: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: "600",
-    color: "#9CA3AF",
+    color: "#6B7280",
+    textAlign: "center",
   },
   tabTextActive: {
-    color: "#FF6600",
+    color: "#FFFFFF",
     fontWeight: "700",
   },
 
-  // Events Styles (from EvenementsScreen)
-  eventsList: {
+  list: {
     padding: 16,
-    backgroundColor: "#F9FAFB",
   },
+
+  // Event Card Styles
   eventCard: {
     backgroundColor: "#fff",
     borderRadius: 20,
@@ -337,6 +433,22 @@ const styles = StyleSheet.create({
   },
   payantText: {
     color: "#EA580C",
+  },
+  favoriteIcon: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   eventCardContent: {
     padding: 16,
@@ -397,11 +509,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  // Acteurs Styles (from ActeursScreen)
-  acteursList: {
-    padding: 16,
-    backgroundColor: "#F9FAFB",
-  },
+  // Acteur Card Styles
   acteurCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -455,87 +563,101 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     fontWeight: "500",
   },
-  cardArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F9FAFB",
+  favoriteIconActeur: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FEE2E2",
     justifyContent: "center",
     alignItems: "center",
   },
 
-  // Opportunites Styles (from OpportunitesScreen)
-  oppList: {
-    padding: 16,
-    backgroundColor: "#F9FAFB",
-  },
+  // Opportunite Card Styles
   oppCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    marginBottom: 12,
-    padding: 14,
+    borderRadius: 20,
+    marginBottom: 14,
+    padding: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 4,
     borderWidth: 1,
     borderColor: "#F3F4F6",
   },
-  oppMain: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 10,
-  },
-  oppIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  oppContent: {
-    flex: 1,
-    gap: 4,
-  },
-  oppTop: {
+  oppHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 2,
+    marginBottom: 12,
+  },
+  oppIconContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  oppHeaderRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   typeText: {
-    fontSize: 12.5,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-  },
-  montantBadge: {
-    backgroundColor: "#D1FAE5",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  montantText: {
     fontSize: 11,
-    fontWeight: "600",
-    color: "#059669",
+    fontWeight: "700",
+    letterSpacing: 0.8,
+  },
+  favoriteIconOpp: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FEE2E2",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  oppBody: {
+    marginBottom: 12,
+    gap: 6,
   },
   oppTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: "#111827",
-    lineHeight: 20,
+    lineHeight: 22,
   },
   oppOrganisme: {
-    fontSize: 12,
-    color: "#9CA3AF",
+    fontSize: 13,
+    color: "#6B7280",
     fontWeight: "500",
+  },
+  montantBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: "#D1FAE5",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    gap: 4,
+    marginTop: 4,
+  },
+  montantText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#059669",
   },
   oppFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 10,
+    paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: "#F3F4F6",
   },
@@ -545,7 +667,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   infoText: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#6B7280",
     fontWeight: "600",
   },
@@ -557,24 +679,25 @@ const styles = StyleSheet.create({
     paddingVertical: 80,
   },
   emptyIconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: "#F3F4F6",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 20,
+    fontWeight: "800",
     color: "#374151",
-    marginTop: 8,
+    marginTop: 12,
   },
   emptySubtext: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#9CA3AF",
-    marginTop: 6,
+    marginTop: 8,
     fontWeight: "500",
+    textAlign: "center",
   },
 });

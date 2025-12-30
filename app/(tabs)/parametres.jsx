@@ -6,13 +6,15 @@ import {
   TouchableOpacity,
   Switch,
   Animated,
+  Alert,
 } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "../../components/Header";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import { useAuth } from "../../context/AuthContext";
 
 export default function ParametresScreen() {
   const [notificationsPush, setNotificationsPush] = useState(true);
@@ -26,6 +28,28 @@ export default function ParametresScreen() {
       useNativeDriver: true,
     }).start();
   }, [animation, notificationsPush]);
+
+  const { logout, } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    Alert.alert("Déconnexion", "Êtes-vous sûr de vouloir vous déconnecter ?", [
+      {
+        text: "Annuler",
+        style: "cancel",
+      },
+      {
+        text: "Déconnexion",
+        style: "destructive",
+        onPress: async () => {
+          const result = await logout();
+          if (result.success) {
+            router.replace("/auth");
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <SafeAreaWrapper>
@@ -143,7 +167,11 @@ export default function ParametresScreen() {
             <View style={styles.separator} />
 
             {/* Se déconnecter */}
-            <TouchableOpacity style={styles.settingRow} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.settingRow}
+              activeOpacity={0.7}
+              onPress={handleLogout}
+            >
               <View style={styles.settingLeft}>
                 <LinearGradient
                   colors={["#FEE2E2", "#FECACA"]}
