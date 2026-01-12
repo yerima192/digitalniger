@@ -24,7 +24,7 @@ export default function Index() {
        */}
       <View style={styles.logoContainer}>
         <Image
-          source={require("../../mobile/assets/images/logo.png")}
+          source={require("../assets/images/logo.png")}
           style={styles.avatar}
         />
         <Text style={styles.subtitle}>
