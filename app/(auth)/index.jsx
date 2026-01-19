@@ -35,8 +35,8 @@ export default function AuthScreen() {
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
   const [showSignupPassword, setShowSignupPassword] = useState(false);
-  const [showSignupConfirmPassword, setShowSignupConfirmPassword] =
-    useState(false);
+  const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
+  const [genreUser, setGenreUser] = useState(false);
 
   const tabs = ["Se connecter", "S'inscrire"];
 
@@ -230,6 +230,7 @@ export default function AuthScreen() {
           />
         </View>
       </View>
+      
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Mot de passe</Text>
