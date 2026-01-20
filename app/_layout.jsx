@@ -1,53 +1,71 @@
 import { Stack } from "expo-router";
-import { AuthProvider } from "../context/AuthContext";
 import { AuthGuard } from "../components/AuthGuard";
+import { AuthProvider } from "../context/AuthContext";
+import { FavoritesProvider } from "../context/FavoritesContext";
+import { NotificationsProvider } from "../context/NotificationsContext";
 
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <AuthGuard>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: "fade",
-            contentStyle: { backgroundColor: "#F9FAFB" },
-          }}
-        >
-          {/* Page d'accueil/Splash */}
-          <Stack.Screen
-            name="index"
-            options={{
-              headerShown: false,
-            }}
-          />
+      <FavoritesProvider>
+        <NotificationsProvider>
+          <AuthGuard>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: "fade",
+                contentStyle: { backgroundColor: "#F9FAFB" },
+              }}
+            >
+              {/* Page d'accueil/Splash */}
+              <Stack.Screen
+                name="index"
+                options={{
+                  headerShown: false,
+                }}
+              />
 
-          {/* Groupe d'authentification */}
-          <Stack.Screen
-            name="(auth)/index"
-            options={{
-              headerShown: false,
-              animation: "slide_from_bottom",
-            }}
-          />
-          <Stack.Screen
-            name="(auth)/forgot-password"
-            options={{
-              headerShown: false,
-              animation: "slide_from_right",
-            }}
-          />
+              {/* Groupe d'authentification */}
+              <Stack.Screen
+                name="(auth)/index"
+                options={{
+                  headerShown: false,
+                  animation: "slide_from_bottom",
+                }}
+              />
+              <Stack.Screen
+                name="(auth)/forgot-password"
+                options={{
+                  headerShown: false,
+                  animation: "slide_from_right",
+                }}
+              />
+              <Stack.Screen
+                name="(auth)/select-user-type"
+                options={{
+                  headerShown: false,
+                  animation: "slide_from_right",
+                }}
+              />
+              <Stack.Screen
+                name="(auth)/complete-profile"
+                options={{
+                  headerShown: false,
+                  animation: "slide_from_right",
+                }}
+              />
 
-          {/* Groupe principal avec tabs (protégé) */}
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              headerShown: false,
-            }}
-          />
+              {/* Groupe principal avec tabs (protégé) */}
+              <Stack.Screen
+                name="(tabs)"
+                options={{
+                  headerShown: false,
+                }}
+              />
 
-          {/* Écrans de détails */}
-          <Stack.Screen
-            name="event-detail"
+              {/* Écrans de détails */}
+              <Stack.Screen
+                name="event-detail"
             options={{
               headerShown: false,
               animation: "slide_from_right",
@@ -133,7 +151,9 @@ export default function RootLayout() {
             }}
           />
         </Stack>
-      </AuthGuard>
+          </AuthGuard>
+        </NotificationsProvider>
+      </FavoritesProvider>
     </AuthProvider>
   );
 }

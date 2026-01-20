@@ -1,27 +1,35 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  Linking,
-  Alert,
-  Platform,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { eventsData } from "../data/eventsData";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import SafeAreaWrapper from "../components/SafeAreaWrapper";
+import { useFavorites } from "../context/FavoritesContext";
+import { eventsData } from "../data/eventsData";
 
 export default function EventDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { isEventFavorited, toggleEventFavorite } = useFavorites();
   const [isFavorite, setIsFavorite] = useState(false);
 
   const event = eventsData.find((e) => e.id === params.eventId);
+
+  useEffect(() => {
+    if (event) {
+      setIsFavorite(isEventFavorited(event.id));
+    }
+  }, [event]);
 
   if (!event) {
     return (
@@ -48,7 +56,8 @@ export default function EventDetailScreen() {
     }
   };
 
-  const toggleFavorite = () => {
+  const toggleFavorite = async () => {
+    await toggleEventFavorite(event);
     setIsFavorite(!isFavorite);
   };
 

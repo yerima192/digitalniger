@@ -1,25 +1,28 @@
-import React, { useState, useRef } from "react";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  Animated,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Animated,
-  ActivityIndicator,
-  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Image
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 import { useAuth } from "../../context/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function AuthScreen() {
   const router = useRouter();
+  const { login, signup } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [tabWidth, setTabWidth] = useState(0);
@@ -28,6 +31,7 @@ export default function AuthScreen() {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
 
   // États pour l'inscription
   const [signupName, setSignupName] = useState("");
@@ -36,7 +40,7 @@ export default function AuthScreen() {
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
-  const [genreUser, setGenreUser] = useState(false);
+  const [signupLoading, setSignupLoading] = useState(false);
 
   const tabs = ["Se connecter", "S'inscrire"];
 
@@ -56,55 +60,65 @@ export default function AuthScreen() {
     setTabWidth(calculatedTabWidth);
   };
 
-  const { login, signup } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  // Fonction de connexion
   const handleLogin = async () => {
     if (!loginEmail || !loginPassword) {
-      alert("Veuillez remplir tous les champs");
+      Alert.alert("Erreur", "Veuillez remplir tous les champs");
       return;
     }
 
-    setIsSubmitting(true);
-    const result = await login(loginEmail, loginPassword);
-    setIsSubmitting(false);
-
-    if (result.success) {
-      router.replace("(tabs)");
-    } else {
-      alert(result.error || "Erreur de connexion");
+    setLoginLoading(true);
+    try {
+      const result = await login(loginEmail, loginPassword);
+      if (result.success) {
+        router.replace("/(tabs)");
+      } else {
+        Alert.alert("Erreur", result.error || "Email ou mot de passe incorrect");
+      }
+    } catch (error) {
+      Alert.alert("Erreur", "Erreur de connexion");
+    } finally {
+      setLoginLoading(false);
     }
   };
 
+  // Fonction d'inscription avec redirection vers sélection du type
   const handleSignup = async () => {
-    if (
-      !signupName ||
-      !signupEmail ||
-      !signupPassword ||
-      !signupConfirmPassword
-    ) {
-      alert("Veuillez remplir tous les champs");
+    if (!signupName || !signupEmail || !signupPassword || !signupConfirmPassword) {
+      Alert.alert("Erreur", "Veuillez remplir tous les champs");
       return;
     }
 
     if (signupPassword !== signupConfirmPassword) {
-      alert("Les mots de passe ne correspondent pas");
+      Alert.alert("Erreur", "Les mots de passe ne correspondent pas");
       return;
     }
 
     if (signupPassword.length < 6) {
-      alert("Le mot de passe doit contenir au moins 6 caractères");
+      Alert.alert("Erreur", "Le mot de passe doit contenir au moins 6 caractères");
       return;
     }
 
-    setIsSubmitting(true);
-    const result = await signup(signupName, signupEmail, signupPassword);
-    setIsSubmitting(false);
+    // Valider l'email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(signupEmail)) {
+      Alert.alert("Erreur", "Veuillez entrer une adresse email valide");
+      return;
+    }
 
-    if (result.success) {
-      router.replace("(tabs)");
-    } else {
-      alert(result.error || "Erreur lors de l'inscription");
+    setSignupLoading(true);
+    try {
+      const result = await signup(signupName, signupEmail, signupPassword);
+      if (result.success) {
+        // Rediriger vers la sélection du type d'utilisateur
+        router.push("/(auth)/select-user-type");
+      } else {
+        Alert.alert("Erreur", result.error || "Erreur lors de l'inscription");
+      }
+    } catch (error) {
+      Alert.alert("Erreur", "Erreur lors de l'inscription");
+    } finally {
+      setSignupLoading(false);
     }
   };
 
@@ -162,11 +176,11 @@ export default function AuthScreen() {
       <TouchableOpacity
         style={[
           styles.submitButton,
-          isSubmitting && styles.submitButtonDisabled,
+          loginLoading && styles.submitButtonDisabled,
         ]}
         onPress={handleLogin}
         activeOpacity={0.8}
-        disabled={isSubmitting}
+        disabled={loginLoading}
       >
         <LinearGradient
           colors={["#FF7F27", "#FF6600"]}
@@ -174,12 +188,12 @@ export default function AuthScreen() {
           end={{ x: 1, y: 0 }}
           style={styles.submitGradient}
         >
-          {isSubmitting ? (
+          {loginLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <>
               <Text style={styles.submitButtonText}>Se connecter</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
+              <MaterialCommunityIcons name="arrow-right" size={20} color="#fff" />
             </>
           )}
         </LinearGradient>
@@ -298,11 +312,11 @@ export default function AuthScreen() {
       <TouchableOpacity
         style={[
           styles.submitButtonRegister,
-          isSubmitting && styles.submitButtonDisabled,
+          signupLoading && styles.submitButtonDisabled,
         ]}
         onPress={handleSignup}
         activeOpacity={0.8}
-        disabled={isSubmitting}
+        disabled={signupLoading}
       >
         <LinearGradient
           colors={["#FF7F27", "#FF6600"]}
@@ -310,12 +324,12 @@ export default function AuthScreen() {
           end={{ x: 1, y: 0 }}
           style={styles.submitGradient}
         >
-          {isSubmitting ? (
+          {signupLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <>
               <Text style={styles.submitButtonText}>S&apos;inscrire</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
+              <MaterialCommunityIcons name="arrow-right" size={20} color="#fff" />
             </>
           )}
         </LinearGradient>

@@ -1,26 +1,34 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Linking,
-  Alert,
-  Platform,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { opportunitesData } from "../data/opportunitesData";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import SafeAreaWrapper from "../components/SafeAreaWrapper";
+import { useFavorites } from "../context/FavoritesContext";
+import { opportunitesData } from "../data/opportunitesData";
 
 export default function OpportuniteDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { isOpportunityFavorited, toggleOpportunityFavorite } = useFavorites();
   const [isFavorite, setIsFavorite] = useState(false);
 
   const opportunite = opportunitesData.find((o) => o.id === params.opportuniteId);
+
+  useEffect(() => {
+    if (opportunite) {
+      setIsFavorite(isOpportunityFavorited(opportunite.id));
+    }
+  }, [opportunite]);
 
   if (!opportunite) {
     return (
@@ -47,7 +55,8 @@ export default function OpportuniteDetailScreen() {
     }
   };
 
-  const toggleFavorite = () => {
+  const toggleFavorite = async () => {
+    await toggleOpportunityFavorite(opportunite);
     setIsFavorite(!isFavorite);
   };
 

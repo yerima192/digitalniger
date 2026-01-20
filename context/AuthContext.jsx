@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext({});
 
@@ -9,6 +9,52 @@ export const useAuth = () => {
     throw new Error("useAuth doit être utilisé dans un AuthProvider");
   }
   return context;
+};
+
+// Types d'utilisateurs disponibles
+export const USER_TYPES = {
+  STUDENT: "student",
+  PROFESSIONAL: "professional",
+  DEVELOPER: "developer",
+  DESIGNER: "designer",
+  STARTUP: "startup",
+  COMPANY: "company",
+  ORGANIZATION: "organization",
+  FREELANCER: "freelancer",
+  CONSULTANT: "consultant",
+  ADMIN: "admin"
+};
+
+// Tranches d'âge
+export const AGE_RANGES = [
+  "18-21",
+  "22-25",
+  "26-34",
+  "35-40",
+  "41-50",
+  "51+"
+];
+
+// Genres
+export const GENDERS = [
+  "Homme",
+  "Femme"
+];
+
+// Pays/Villes nigériennes
+export const NIGERIA_LOCATIONS = {
+  "Niger": [
+    "Niamey",
+    "Maradi",
+    "Zinder",
+    "Dosso",
+    "Tahoua",
+    "Agadez",
+    "Diffa",
+    "Tillabery",
+    "Birni N'Konni"
+  ],
+  "Régions": ["Niamey", "Agadez", "Diffa", "Dosso", "Maradi", "Tahoua", "Tillabery", "Zinder"]
 };
 
 export const AuthProvider = ({ children }) => {
@@ -40,20 +86,25 @@ export const AuthProvider = ({ children }) => {
   // Connexion
   const login = async (email, password) => {
     try {
-      // TODO: Remplacer par votre appel API réel
-      // const response = await fetch("YOUR_API_URL/login", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ email, password }),
-      // });
-      // const data = await response.json();
-
       // Simulation d'une réponse API (à remplacer)
       const mockUser = {
         id: "1",
         name: "John Doe",
         email: email,
         avatar: "https://ui-avatars.com/api/?name=John+Doe",
+        userType: USER_TYPES.PROFESSIONAL,
+        gender: "Homme",
+        ageRange: "26-34",
+        city: "Niamey",
+        country: "Niger",
+        phone: "+227 98 88 88 88",
+        profileComplete: true,
+        createdAt: new Date().toISOString(),
+        preferences: {
+          notifications: true,
+          emailAlerts: true,
+          categories: []
+        }
       };
       const mockToken = "fake-jwt-token-" + Date.now();
 
@@ -74,31 +125,36 @@ export const AuthProvider = ({ children }) => {
   // Inscription
   const signup = async (name, email, password) => {
     try {
-      // TODO: Remplacer par votre appel API réel
-      // const response = await fetch("YOUR_API_URL/signup", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ name, email, password }),
-      // });
-      // const data = await response.json();
-
       // Simulation d'une réponse API (à remplacer)
-      const mockUser = {
-        id: "1",
+      const newUser = {
+        id: Date.now().toString(),
         name: name,
         email: email,
-        avatar: `https://ui-avatars.com/api/?name=${name}`,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
+        userType: null, // À définir après signup
+        gender: null,
+        ageRange: null,
+        city: null,
+        country: "Niger",
+        phone: null,
+        profileComplete: false, // Doit compléter le profil
+        createdAt: new Date().toISOString(),
+        preferences: {
+          notifications: true,
+          emailAlerts: true,
+          categories: []
+        }
       };
       const mockToken = "fake-jwt-token-" + Date.now();
 
       // Sauvegarder les données
-      await AsyncStorage.setItem("@user", JSON.stringify(mockUser));
+      await AsyncStorage.setItem("@user", JSON.stringify(newUser));
       await AsyncStorage.setItem("@token", mockToken);
 
-      setUser(mockUser);
+      setUser(newUser);
       setIsAuthenticated(true);
 
-      return { success: true, user: mockUser };
+      return { success: true, user: newUser, requiresProfileCompletion: true };
     } catch (error) {
       console.error("Erreur d'inscription:", error);
       return { success: false, error: "Erreur lors de l'inscription" };
@@ -142,11 +198,33 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (updates) => {
     try {
       const updatedUser = { ...user, ...updates };
+      
+      // Marquer le profil comme complet si tous les champs sont remplis
+      if (updates.userType && updates.gender && updates.ageRange && updates.city) {
+        updatedUser.profileComplete = true;
+      }
+      
       await AsyncStorage.setItem("@user", JSON.stringify(updatedUser));
       setUser(updatedUser);
       return { success: true, user: updatedUser };
     } catch (error) {
       console.error("Erreur de mise à jour du profil:", error);
+      return { success: false };
+    }
+  };
+
+  // Mettre à jour les préférences
+  const updatePreferences = async (preferences) => {
+    try {
+      const updatedUser = {
+        ...user,
+        preferences: { ...user.preferences, ...preferences }
+      };
+      await AsyncStorage.setItem("@user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      return { success: true, user: updatedUser };
+    } catch (error) {
+      console.error("Erreur de mise à jour des préférences:", error);
       return { success: false };
     }
   };
@@ -160,6 +238,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     resetPassword,
     updateProfile,
+    updatePreferences,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

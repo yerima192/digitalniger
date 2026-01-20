@@ -1,34 +1,29 @@
-import React, { useState, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  Animated,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
-import Header from "../../components/Header";
-import { eventsData } from "../../data/eventsData";
-import { acteursData } from "../../data/acteursData";
-import { opportunitesData } from "../../data/opportunitesData";
+import { useRef, useState } from "react";
+import {
+  Animated,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-export default function FavorisScreen() {
+import Header from "../../components/Header";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import { useFavorites } from "../../context/FavoritesContext";
+
+export default function FavoritesScreen() {
   const router = useRouter();
+  const { events, actors, opportunities, toggleEventFavorite, toggleActorFavorite, toggleOpportunityFavorite } = useFavorites();
   const [activeTab, setActiveTab] = useState(0);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [tabWidth, setTabWidth] = useState(0);
-  
-  const tabs = ["Événements", "Acteurs", "Opportunités"];
 
-// Simuler des favoris (vous pourrez plus tard gérer ça avec un state global ou stockage)
-  const favoriteEvents = eventsData.slice(0, 3);
-  const favoriteActeurs = acteursData.slice(0, 3);
-  const favoriteOpportunites = opportunitesData.slice(0, 3);
+  const tabs = ["Événements", "Acteurs", "Opportunités"];
 
   const handleTabChange = (index) => {
     setActiveTab(index);
@@ -42,7 +37,7 @@ export default function FavorisScreen() {
 
   const onTabsLayout = (event) => {
     const { width } = event.nativeEvent.layout;
-    const calculatedTabWidth = (width - 8) / 3; // 8 = padding (4*2)
+    const calculatedTabWidth = (width - 8) / 3;
     setTabWidth(calculatedTabWidth);
   };
 
@@ -67,19 +62,26 @@ export default function FavorisScreen() {
         <View
           style={[
             styles.priceBadge,
-            item.price === "Gratuit" ? styles.gratuitBadge : styles.payantBadge,
+            item.price === "Gratuit"
+              ? styles.gratuitBadge
+              : styles.payantBadge,
           ]}
         >
           <Text
             style={[
               styles.priceBadgeText,
-              item.price === "Gratuit" ? styles.gratuitText : styles.payantText,
+              item.price === "Gratuit"
+                ? styles.gratuitText
+                : styles.payantText,
             ]}
           >
             {item.price}
           </Text>
         </View>
-        <TouchableOpacity style={styles.favoriteIcon}>
+        <TouchableOpacity
+          style={styles.favoriteIcon}
+          onPress={() => toggleEventFavorite(item)}
+        >
           <Ionicons name="heart" size={20} color="#EF4444" />
         </TouchableOpacity>
       </View>
@@ -93,13 +95,21 @@ export default function FavorisScreen() {
         </Text>
         <View style={styles.eventDateContainer}>
           <View style={styles.iconWrapper}>
-            <Ionicons name="calendar-outline" size={16} color="#6B7280" />
+            <Ionicons
+              name="calendar-outline"
+              size={16}
+              color="#6B7280"
+            />
           </View>
           <Text style={styles.eventDate}>{item.date}</Text>
         </View>
         <View style={styles.eventLocationContainer}>
           <View style={styles.iconWrapper}>
-            <Ionicons name="location-outline" size={16} color="#6B7280" />
+            <Ionicons
+              name="location-outline"
+              size={16}
+              color="#6B7280"
+            />
           </View>
           <Text style={styles.eventLocation}>
             {item.city}, {item.country}
@@ -138,13 +148,16 @@ export default function FavorisScreen() {
           </Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.favoriteIconActeur}>
+      <TouchableOpacity
+        style={styles.favoriteIconActeur}
+        onPress={() => toggleActorFavorite(item)}
+      >
         <Ionicons name="heart" size={20} color="#EF4444" />
       </TouchableOpacity>
     </TouchableOpacity>
   );
 
-  // Render Opportunite Card
+  // Render Opportunité Card
   const renderOpportuniteCard = ({ item }) => (
     <TouchableOpacity
       style={styles.oppCard}
@@ -170,7 +183,10 @@ export default function FavorisScreen() {
           <Text style={[styles.typeText, { color: item.color }]}>
             {item.type.toUpperCase()}
           </Text>
-          <TouchableOpacity style={styles.favoriteIconOpp}>
+          <TouchableOpacity
+            style={styles.favoriteIconOpp}
+            onPress={() => toggleOpportunityFavorite(item)}
+          >
             <Ionicons name="heart" size={18} color="#EF4444" />
           </TouchableOpacity>
         </View>
@@ -187,7 +203,11 @@ export default function FavorisScreen() {
 
         {item.montant && (
           <View style={styles.montantBadge}>
-            <Ionicons name="cash-outline" size={14} color="#059669" />
+            <Ionicons
+              name="cash-outline"
+              size={14}
+              color="#059669"
+            />
             <Text style={styles.montantText}>{item.montant}</Text>
           </View>
         )}
@@ -195,26 +215,34 @@ export default function FavorisScreen() {
 
       <View style={styles.oppFooter}>
         <View style={styles.oppInfo}>
-          <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
+          <Ionicons
+            name="calendar-outline"
+            size={14}
+            color="#9CA3AF"
+          />
           <Text style={styles.infoText}>{item.deadline}</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color="#D1D5DB"
+        />
       </View>
     </TouchableOpacity>
   );
 
   const getTotalCount = () => {
-    return favoriteEvents.length + favoriteActeurs.length + favoriteOpportunites.length;
+    return events.length + actors.length + opportunities.length;
   };
 
   const getCurrentData = () => {
     switch (activeTab) {
       case 0:
-        return favoriteEvents;
+        return events;
       case 1:
-        return favoriteActeurs;
+        return actors;
       case 2:
-        return favoriteOpportunites;
+        return opportunities;
       default:
         return [];
     }
@@ -267,7 +295,11 @@ export default function FavorisScreen() {
                     {
                       translateX: slideAnim.interpolate({
                         inputRange: [0, 1, 2],
-                        outputRange: [4, tabWidth + 4, tabWidth * 2 + 4],
+                        outputRange: [
+                          4,
+                          tabWidth + 4,
+                          tabWidth * 2 + 4,
+                        ],
                       }),
                     },
                   ],
@@ -306,11 +338,15 @@ export default function FavorisScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconCircle}>
-              <Ionicons name="heart-outline" size={48} color="#9CA3AF" />
+              <Ionicons
+                name="heart-outline"
+                size={48}
+                color="#9CA3AF"
+              />
             </View>
             <Text style={styles.emptyText}>{getEmptyMessage()}</Text>
             <Text style={styles.emptySubtext}>
-              Ajoutez des favoris en appuyant sur l&apos;icône cœur
+              Ajoutez des favoris en appuyant sur l'icône cœur
             </Text>
           </View>
         }
@@ -572,7 +608,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Opportunite Card Styles
+  // Opportunité Card Styles
   oppCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 20,

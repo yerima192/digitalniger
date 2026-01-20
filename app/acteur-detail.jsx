@@ -1,27 +1,35 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  Linking,
-  Alert,
-  Platform,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { acteursData } from "../data/acteursData";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import SafeAreaWrapper from "../components/SafeAreaWrapper";
+import { useFavorites } from "../context/FavoritesContext";
+import { acteursData } from "../data/acteursData";
 
 export default function ActeurDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { isActorFavorited, toggleActorFavorite } = useFavorites();
   const [isFavorite, setIsFavorite] = useState(false);
 
   const acteur = acteursData.find((a) => a.id === params.acteurId);
+
+  useEffect(() => {
+    if (acteur) {
+      setIsFavorite(isActorFavorited(acteur.id));
+    }
+  }, [acteur]);
 
   if (!acteur) {
     return (
@@ -48,6 +56,11 @@ export default function ActeurDetailScreen() {
     }
   };
 
+  const toggleFavorite = async () => {
+    await toggleActorFavorite(acteur);
+    setIsFavorite(!isFavorite);
+  };
+
   const handleEmail = () => {
     if (acteur.email) {
       Linking.openURL(`mailto:${acteur.email}`).catch(() => {
@@ -68,10 +81,6 @@ export default function ActeurDetailScreen() {
     Linking.openURL(url).catch(() => {
       Alert.alert("Erreur", "Impossible d'ouvrir ce lien");
     });
-  };
-
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
   };
 
   return (
