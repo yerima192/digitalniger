@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { View, ActivityIndicator, StyleSheet, Image, Text } from "react-native";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../context/AuthContext";
 
 export default function Index() {

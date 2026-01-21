@@ -1,12 +1,17 @@
 // components/Header.js
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useNotifications } from "../context/NotificationsContext";
 // import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Header({ title, subtitle, badgeCount, showBack = false }) {
   const router = useRouter();
+  const { notifications } = useNotifications();
+  
+  // Calculate unread notifications count
+  const unreadCount = notifications.filter(notif => !notif.read).length;
+  const notificationBadgeCount = badgeCount || unreadCount;
   
   return (
     <View style={styles.headerContainer}>
@@ -41,10 +46,10 @@ export default function Header({ title, subtitle, badgeCount, showBack = false }
               >
                 <View style={styles.iconWrapper}>
                   <Ionicons name="notifications-outline" size={22} color="#1F2937" />
-                  {badgeCount > 0 && (
+                  {notificationBadgeCount > 0 && (
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>
-                        {badgeCount > 99 ? '99+' : badgeCount}
+                        {notificationBadgeCount > 99 ? '99+' : notificationBadgeCount}
                       </Text>
                     </View>
                   )}

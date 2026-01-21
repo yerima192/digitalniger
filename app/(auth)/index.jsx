@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,12 +14,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  Image
+  View
 } from "react-native";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
 import { useAuth } from "../../context/AuthContext";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function AuthScreen() {
   const router = useRouter();
@@ -41,6 +40,7 @@ export default function AuthScreen() {
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
   const [signupLoading, setSignupLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const tabs = ["Se connecter", "S'inscrire"];
 
@@ -75,7 +75,7 @@ export default function AuthScreen() {
       } else {
         Alert.alert("Erreur", result.error || "Email ou mot de passe incorrect");
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert("Erreur", "Erreur de connexion");
     } finally {
       setLoginLoading(false);
@@ -86,6 +86,11 @@ export default function AuthScreen() {
   const handleSignup = async () => {
     if (!signupName || !signupEmail || !signupPassword || !signupConfirmPassword) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs");
+      return;
+    }
+
+    if (!acceptedTerms) {
+      Alert.alert("Erreur", "Veuillez accepter les conditions d'utilisation");
       return;
     }
 
@@ -115,7 +120,7 @@ export default function AuthScreen() {
       } else {
         Alert.alert("Erreur", result.error || "Erreur lors de l'inscription");
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert("Erreur", "Erreur lors de l'inscription");
     } finally {
       setSignupLoading(false);
@@ -301,22 +306,29 @@ export default function AuthScreen() {
       </View>
 
       <View style={styles.termsContainer}>
-        <Text style={styles.termsText}>
-          En vous inscrivant, vous acceptez nos{" "}
-          <Text style={styles.termsLink}>Conditions d&apos;utilisation</Text> et
-          notre{" "}
-          <Text style={styles.termsLink}>Politique de confidentialité</Text>
-        </Text>
+        <TouchableOpacity 
+          style={styles.termsCheckbox}
+          onPress={() => setAcceptedTerms(!acceptedTerms)}
+        >
+          <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
+            {acceptedTerms && (
+              <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+            )}
+          </View>
+          <Text style={styles.termsText}>
+            En vous inscrivant, vous acceptez nos{" "}
+            <Text style={styles.termsLink}>Conditions d&apos;utilisation</Text> et
+            notre{" "}
+            <Text style={styles.termsLink}>Politique de confidentialité</Text>
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity
-        style={[
-          styles.submitButtonRegister,
-          signupLoading && styles.submitButtonDisabled,
-        ]}
+        style={styles.submitButtonRegister}
         onPress={handleSignup}
         activeOpacity={0.8}
-        disabled={signupLoading}
+        disabled={signupLoading || !acceptedTerms}
       >
         <LinearGradient
           colors={["#FF7F27", "#FF6600"]}
@@ -649,11 +661,30 @@ const styles = StyleSheet.create({
   termsContainer: {
     marginTop: -8,
   },
+  termsCheckbox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: "#D1D5DB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 2,
+  },
+  checkboxChecked: {
+    backgroundColor: "#FF6600",
+    borderColor: "#FF6600",
+  },
   termsText: {
     fontSize: 13,
     color: "#6B7280",
     lineHeight: 18,
-    textAlign: "center",
+    flex: 1,
   },
   termsLink: {
     color: "#FF6600",

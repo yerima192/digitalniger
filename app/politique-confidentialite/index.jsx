@@ -1,12 +1,30 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Header from "../../components/Header";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import Toast from "../../components/Toast";
 
 export default function PolitiqueConfidentialite() {
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
+
+  // const displayToast = (message, type = "success") => {
+  //   setToastMessage(message);
+  //   setToastType(type);
+  //   setShowToast(true);
+  // };
   return (
     <SafeAreaWrapper>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onHide={() => setShowToast(false)}
+        />
+      )}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Header
           title="Politique de confidentialité"

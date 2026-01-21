@@ -1,19 +1,29 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useState } from "react";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
-import Header from "../../components/Header";
 import { router } from "expo-router";
+import { useState } from "react";
+import {
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import Header from "../../components/Header";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import Toast from "../../components/Toast";
 
 export default function FAQScreen() {
   const [expandedIndex, setExpandedIndex] = useState(null);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
+
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   const faqData = [
     {
@@ -136,11 +146,22 @@ export default function FAQScreen() {
 
   const toggleQuestion = (categoryIndex, questionIndex) => {
     const key = `${categoryIndex}-${questionIndex}`;
-    setExpandedIndex(expandedIndex === key ? null : key);
+    const newExpandedIndex = expandedIndex === key ? null : key;
+    setExpandedIndex(newExpandedIndex);
+    if (newExpandedIndex) {
+      displayToast("Question dépliée", "info");
+    }
   };
 
   return (
     <SafeAreaWrapper>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onHide={() => setShowToast(false)}
+        />
+      )}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Header
           title="Questions fréquentes"

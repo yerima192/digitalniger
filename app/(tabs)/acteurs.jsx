@@ -1,982 +1,425 @@
-import React, { useEffect, useRef, useState } from "react";
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  Animated,
-  Dimensions,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import Header from "../../components/Header";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
-import { acteursData } from "../../data/acteursData";
+    FlatList,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import Header from '../../components/Header';
+import { showToast } from '../../components/Toast';
+import { useFavorites } from '../../context/FavoritesContext';
+import { acteursData } from '../../data/acteursData';
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const MAP_WIDTH = SCREEN_WIDTH - 32;
-const MAP_HEIGHT = 500;
-
-export default function ActeursScreen() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedCategorie, setSelectedCategorie] = useState("Tous");
-  const [selectedVille, setSelectedVille] = useState("Tous");
-  const [viewMode, setViewMode] = useState("Liste");
-  const slideAnim = useRef(new Animated.Value(0)).current;
-  const filterAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.spring(slideAnim, {
-      toValue: viewMode === "Liste" ? 0 : 1,
-      useNativeDriver: true,
-      friction: 8,
-      tension: 40,
-    }).start();
-  }, [slideAnim, viewMode]);
-
-  useEffect(() => {
-    Animated.spring(filterAnim, {
-      toValue: showFilters ? 1 : 0,
-      useNativeDriver: true,
-      friction: 8,
-    }).start();
-  }, [filterAnim, showFilters]);
-
-  const filteredActeurs = acteursData.filter((acteur) => {
-    const matchesSearch =
-      acteur.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      acteur.domaine.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategorie =
-      selectedCategorie === "Tous" || acteur.categorie === selectedCategorie;
-    const matchesVille =
-      selectedVille === "Tous" || acteur.ville === selectedVille;
-    return matchesSearch && matchesCategorie && matchesVille;
-  });
-
-  // Positionnement intelligent des marqueurs sur la carte
-  const getMarkerPosition = (index, total) => {
-    const rows = Math.ceil(Math.sqrt(total));
-    const cols = Math.ceil(total / rows);
-    const row = Math.floor(index / cols);
-    const col = index % cols;
-
-    const padding = 60;
-    const availableWidth = MAP_WIDTH - padding * 2;
-    const availableHeight = MAP_HEIGHT - 180;
-
-    const cellWidth = availableWidth / cols;
-    const cellHeight = availableHeight / rows;
-
-    // Ajouter un décalage aléatoire pour plus de naturel
-    const randomOffsetX = (Math.random() - 0.5) * 30;
-    const randomOffsetY = (Math.random() - 0.5) * 30;
-
-    return {
-      left: padding + col * cellWidth + cellWidth / 2 - 24 + randomOffsetX,
-      top: 120 + row * cellHeight + cellHeight / 2 - 24 + randomOffsetY,
-    };
-  };
-
-  const renderActeurCard = ({ item, index }) => {
-    return (
-      <TouchableOpacity
-        style={styles.acteurCard}
-        onPress={() =>
-          router.push({
-            pathname: "/acteur-detail",
-            params: { acteurId: item.id },
-          })
-        }
-        activeOpacity={0.97}
-      >
-        <View style={styles.acteurLogoContainer}>
-          <Image source={{ uri: item.logo }} style={styles.acteurLogo} />
-        </View>
-        <View style={styles.acteurContent}>
-          <Text style={styles.acteurNom} numberOfLines={1}>
-            {item.nom}
-          </Text>
-          <Text style={styles.acteurDomaine} numberOfLines={1}>
-            {item.domaine}
-          </Text>
-          <View style={styles.locationRow}>
-            <Ionicons name="location" size={14} color="#9CA3AF" />
-            <Text style={styles.acteurLocation} numberOfLines={1}>
-              {item.ville}, {item.pays}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.cardArrow}>
-          <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-        </View>
+// SearchBar
+const SearchBar = ({ value, onChangeText }) => (
+  <View style={styles.searchContainer}>
+    <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+    <TextInput
+      style={styles.searchInput}
+      placeholder="Chercher un acteur..."
+      value={value}
+      onChangeText={onChangeText}
+      placeholderTextColor="#999"
+    />
+    {value ? (
+      <TouchableOpacity onPress={() => onChangeText('')}>
+        <Ionicons name="close-circle" size={20} color="#999" />
       </TouchableOpacity>
-    );
-  };
+    ) : null}
+  </View>
+);
 
-  const renderMapMarker = (acteur, index) => {
-    const position = getMarkerPosition(index, filteredActeurs.length);
-
-    return (
-      <TouchableOpacity
-        key={acteur.id}
-        style={[styles.mapMarker, position]}
-        onPress={() =>
-          router.push({
-            pathname: "/acteur-detail",
-            params: { acteurId: acteur.id },
-          })
-        }
-        activeOpacity={0.8}
-      >
-        <View
+// CityFilter
+const CityFilter = ({ activeCity, onCityChange, onReset }) => (
+  <View style={styles.filterContainer}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      {['Tous', 'Niamey', 'Maradi', 'Agadez', 'Tahoua', 'Dosso'].map((city) => (
+        <TouchableOpacity
+          key={city}
           style={[
-            styles.markerCircle,
-            { backgroundColor: acteur.color || "#FF6600" },
+            styles.filterButton,
+            activeCity === city && styles.filterButtonActive,
           ]}
+          onPress={() => onCityChange(city)}
         >
-          <Image source={{ uri: acteur.logo }} style={styles.markerLogo} />
-          <View style={styles.markerPulse} />
-        </View>
-        <View style={styles.markerTooltip}>
-          <Text style={styles.markerText} numberOfLines={1}>
-            {acteur.nom}
+          <Text
+            style={[
+              styles.filterText,
+              activeCity === city && styles.filterTextActive,
+            ]}
+          >
+            {city}
           </Text>
-        </View>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+    {activeCity !== 'Tous' && (
+      <TouchableOpacity onPress={onReset} style={styles.resetButton}>
+        <Ionicons name="close" size={18} color="#999" />
       </TouchableOpacity>
-    );
-  };
+    )}
+  </View>
+);
 
-  const FilterButton = ({ label, selected, onPress }) => (
-    <TouchableOpacity
-      style={[styles.filterBtn, selected && styles.filterBtnActive]}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      {selected && (
-        <LinearGradient
-          colors={["#FF7F27", "#FF6600"]}
-          style={StyleSheet.absoluteFill}
-        />
-      )}
-      <Text
-        style={[styles.filterBtnText, selected && styles.filterBtnTextActive]}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-
-  const regionsNiger = [
-    { name: "Niamey", top: 120, left: 30 },
-    { name: "Tillabéri", top: 90, left: 80 },
-    { name: "Dosso", top: 200, left: 50 },
-    { name: "Tahoua", top: 140, left: 140 },
-    { name: "Maradi", top: 220, right: 80 },
-    { name: "Zinder", top: 180, right: 40 },
-    { name: "Diffa", top: 250, right: 20 },
-    { name: "Agadez", top: 60, left: 180 },
-  ];
-
-  const legendItems = [
-    { label: "Startup", color: "#10B981" },
-    { label: "Hub", color: "#F97316" },
-    { label: "Organisation", color: "#8B5CF6" },
-    { label: "Autres", color: "#0EA5E9" },
-  ];
-
-  const statsItems = [
-    {
-      label: "Acteurs",
-      number: filteredActeurs.length,
-      icon: "business",
-      color: "#FF6600",
-    },
-    { label: "Régions", number: 8, icon: "location", color: "#3B82F6" },
-    { label: "Membres", number: "250+", icon: "people", color: "#10B981" },
-  ];
-
-  return (
-    <SafeAreaWrapper>
-      <Header
-        title="Acteurs Tech"
-        subtitle="L'écosystème numérique du Niger"
-        badgeCount={filteredActeurs.length}
-      />
-
-      <View style={styles.container}>
-        {/* Search and Filter */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchInputContainer}>
-            <View style={styles.searchIconCircle}>
-              <Ionicons name="search-outline" size={20} color="#9CA3AF" />
-            </View>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Rechercher un acteur..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="#9CA3AF"
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-            )}
-          </View>
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              showFilters && styles.filterButtonActive,
-            ]}
-            onPress={() => setShowFilters(!showFilters)}
-            activeOpacity={0.7}
-          >
-            <LinearGradient
-              colors={
-                showFilters ? ["#FF7F27", "#FF6600"] : ["#FFFFFF", "#FFFFFF"]
-              }
-              style={styles.filterButtonGradient}
-            >
-              <Ionicons
-                name="options-outline"
-                size={20}
-                color={showFilters ? "#FFFFFF" : "#111827"}
-              />
-              <Text
-                style={[
-                  styles.filterButtonText,
-                  showFilters && styles.filterButtonTextActive,
-                ]}
-              >
-                Filtres
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-        {/* View Mode Toggle */}
-        <View style={styles.viewModeContainer}>
-          <Animated.View
-            style={[
-              styles.viewModeActiveBg,
-              {
-                transform: [
-                  {
-                    translateX: slideAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, 120],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          />
-
-          <TouchableOpacity
-            style={styles.viewModeButton}
-            onPress={() => setViewMode("Liste")}
-            activeOpacity={0.8}
-          >
-            <Ionicons
-              name="list"
-              size={18}
-              color={viewMode === "Liste" ? "#FFFFFF" : "#6B7280"}
-            />
-            <Text
-              style={[
-                styles.viewModeText,
-                viewMode === "Liste" && styles.viewModeTextActive,
-              ]}
-            >
-              Liste
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.viewModeButton}
-            onPress={() => setViewMode("Carte")}
-            activeOpacity={0.8}
-          >
-            <Ionicons
-              name="map"
-              size={18}
-              color={viewMode === "Carte" ? "#FFFFFF" : "#6B7280"}
-            />
-            <Text
-              style={[
-                styles.viewModeText,
-                viewMode === "Carte" && styles.viewModeTextActive,
-              ]}
-            >
-              Carte
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Filters Panel */}
-        {showFilters && (
-          <Animated.View
-            style={[
-              styles.filtersPanel,
-              {
-                opacity: filterAnim,
-                transform: [
-                  {
-                    translateY: filterAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [-20, 0],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          >
-            <View style={styles.filterSection}>
-              <View style={styles.filterLabelContainer}>
-                <Ionicons name="pricetag-outline" size={16} color="#6B7280" />
-                <Text style={styles.filterLabel}>Catégorie</Text>
-              </View>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.filterOptions}>
-                  {[
-                    "Tous",
-                    "Startup",
-                    "Hub",
-                    "Freelance",
-                    "Organisation",
-                    "ONG",
-                  ].map((cat) => (
-                    <FilterButton
-                      key={cat}
-                      label={cat}
-                      selected={selectedCategorie === cat}
-                      onPress={() => setSelectedCategorie(cat)}
-                    />
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
-            <View style={styles.filterSection}>
-              <View style={styles.filterLabelContainer}>
-                <Ionicons name="location-outline" size={16} color="#6B7280" />
-                <Text style={styles.filterLabel}>Ville</Text>
-              </View>
-              <View style={styles.filterOptions}>
-                {["Tous", "Niamey", "Zinder", "Maradi", "Tahoua"].map(
-                  (ville) => (
-                    <FilterButton
-                      key={ville}
-                      label={ville}
-                      selected={selectedVille === ville}
-                      onPress={() => setSelectedVille(ville)}
-                    />
-                  )
-                )}
-              </View>
-            </View>
-          </Animated.View>
-        )}
+// ActorCard
+const ActorCard = ({ actor, isFavorited, onFavPress, onPress }) => (
+  <TouchableOpacity
+    style={styles.actorCard}
+    onPress={onPress}
+    activeOpacity={0.8}
+  >
+    <View style={styles.cardTop}>
+      <View style={styles.logoContainer}>
+        <Text style={styles.logoPlaceholder}>
+          {actor.name.charAt(0).toUpperCase()}
+        </Text>
       </View>
 
-      {/* Content - Liste ou Carte */}
-      {viewMode === "Liste" ? (
-        <FlatList
-          data={filteredActeurs}
-          renderItem={renderActeurCard}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.acteursList}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <View style={styles.emptyIconCircle}>
-                <Ionicons name="business-outline" size={48} color="#9CA3AF" />
-              </View>
-              <Text style={styles.emptyText}>Aucun acteur trouvé</Text>
-              <Text style={styles.emptySubtext}>
-                Essayez de modifier vos filtres
-              </Text>
-            </View>
-          }
+      <View style={styles.cardInfo}>
+        <Text style={styles.cardTitle} numberOfLines={2}>
+          {actor.name}
+        </Text>
+        <Text style={styles.categoryText}>{actor.category}</Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.favoriteButton}
+        onPress={onFavPress}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <MaterialCommunityIcons
+          name={isFavorited ? 'heart' : 'heart-outline'}
+          size={20}
+          color={isFavorited ? '#FF3B30' : '#FF6600'}
         />
-      ) : (
+      </TouchableOpacity>
+    </View>
+
+    <Text style={styles.description} numberOfLines={2}>
+      {actor.description}
+    </Text>
+
+    <View style={styles.cardMeta}>
+      <View style={styles.metaItem}>
+        <Ionicons name="location" size={13} color="#FF6600" />
+        <Text style={styles.metaText}>{actor.city}</Text>
+      </View>
+
+      <View style={styles.metaItem}>
+        <MaterialCommunityIcons name="briefcase" size={13} color="#FF6600" />
+        <Text style={styles.metaText}>{actor.domain}</Text>
+      </View>
+    </View>
+
+    <View style={styles.cardFooter}>
+      <TouchableOpacity style={styles.contactButton}>
+        <Ionicons name="call" size={14} color="#fff" />
+        <Text style={styles.contactButtonText}>{actor.phone}</Text>
+      </TouchableOpacity>
+    </View>
+  </TouchableOpacity>
+);
+
+// Main Screen
+export default function ActeursScreen() {
+  const router = useRouter();
+  const { actors, toggleActorFavorite } = useFavorites();
+  const [searchText, setSearchText] = useState('');
+  const [activeCity, setActiveCity] = useState('Tous');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Filtrer
+  const filteredActors = acteursData.filter((actor) => {
+    const matchesSearch =
+      (actor.name && actor.name.toLowerCase().includes((searchText || '').toLowerCase())) ||
+      (actor.domain && actor.domain.toLowerCase().includes((searchText || '').toLowerCase()));
+
+    const matchesCity =
+      activeCity === 'Tous' || actor.city === activeCity;
+
+    return matchesSearch && matchesCity;
+  });
+
+  // Refresh
+  const onRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+      showToast('Données actualisées!', 'success');
+    }, 1500);
+  }, []);
+
+  // Toggle favoris
+  const handleToggleFavorite = (actor) => {
+    toggleActorFavorite(actor);
+    const isFavorited = actors.some((a) => a.id === actor.id);
+    showToast(
+      isFavorited ? 'Retiré des favoris' : 'Ajouté aux favoris',
+      'info'
+    );
+  };
+
+  // Naviguer
+  const handleActorPress = (actorId) => {
+    router.push(`/acteur-detail?id=${actorId}`);
+  };
+
+  const handleResetFilter = () => {
+    setActiveCity('Tous');
+    showToast('Filtre réinitialisé', 'success');
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Header title="Acteurs du Numérique" showNotification={true} />
+
+      <SearchBar value={searchText} onChangeText={setSearchText} />
+
+      <CityFilter
+        activeCity={activeCity}
+        onCityChange={(city) => {
+          setActiveCity(city);
+          showToast(`Filtre: ${city}`, 'info');
+        }}
+        onReset={handleResetFilter}
+      />
+
+      {filteredActors.length === 0 ? (
         <ScrollView
-          style={styles.mapScrollView}
-          contentContainerStyle={styles.mapContentContainer}
-          showsVerticalScrollIndicator={false}
+          style={styles.listContainer}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          }
         >
-          <View style={styles.mapContainer}>
-            {/* Map Background */}
-            <LinearGradient
-              colors={["#E0F2FE", "#F0F9FF", "#FFFFFF"]}
-              style={styles.mapBackground}
+          <View style={styles.emptyState}>
+            <MaterialCommunityIcons
+              name="account-search"
+              size={64}
+              color="#ddd"
+            />
+            <Text style={styles.emptyTitle}>Aucun acteur trouvé</Text>
+            <Text style={styles.emptySubtitle}>
+              Essayez d&apos;autres critères de recherche
+            </Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={handleResetFilter}
             >
-              {/* Map Header */}
-              <View style={styles.mapHeader}>
-                <LinearGradient
-                  colors={["#FF7F27", "#FF6600"]}
-                  style={styles.mapTitleContainer}
-                >
-                  <Text style={styles.mapTitle}>NIGER</Text>
-                  <Text style={styles.mapSubtitle}>Écosystème Tech</Text>
-                </LinearGradient>
-              </View>
-
-              {/* Régions Labels */}
-              {regionsNiger.map((region, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.cityLabel,
-                    {
-                      top: region.top,
-                      bottom: region.bottom,
-                      left: region.left,
-                      right: region.right,
-                    },
-                  ]}
-                >
-                  <View style={styles.cityDot} />
-                  <Text style={styles.cityName}>{region.name}</Text>
-                </View>
-              ))}
-
-              {/* Map Markers - Acteurs */}
-              {filteredActeurs.map((acteur, index) =>
-                renderMapMarker(acteur, index)
-              )}
-
-              {/* Legend */}
-              <View style={styles.mapLegend}>
-                <View style={styles.legendHeader}>
-                  <Ionicons name="color-palette" size={16} color="#FF6600" />
-                  <Text style={styles.legendTitle}>Légende</Text>
-                </View>
-                {legendItems.map((item, index) => (
-                  <View key={index} style={styles.legendItem}>
-                    <View
-                      style={[
-                        styles.legendDot,
-                        { backgroundColor: item.color },
-                      ]}
-                    />
-                    <Text style={styles.legendText}>{item.label}</Text>
-                  </View>
-                ))}
-              </View>
-            </LinearGradient>
-
-            {/* Map Stats */}
-            <View style={styles.mapStats}>
-              {statsItems.map((item, index) => (
-                <LinearGradient
-                  key={index}
-                  colors={["#FFFFFF", "#F9FAFB"]}
-                  style={styles.statCard}
-                >
-                  <View
-                    style={[
-                      styles.statIconContainer,
-                      { backgroundColor: `${item.color}15` },
-                    ]}
-                  >
-                    <Ionicons name={item.icon} size={24} color={item.color} />
-                  </View>
-                  <Text style={styles.statNumber}>{item.number}</Text>
-                  <Text style={styles.statLabel}>{item.label}</Text>
-                </LinearGradient>
-              ))}
-            </View>
+              <Text style={styles.retryButtonText}>Réinitialiser les filtres</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
+      ) : (
+        <FlatList
+          data={filteredActors}
+          renderItem={({ item }) => (
+            <ActorCard
+              actor={item}
+              isFavorited={actors.some((a) => a.id === item.id)}
+              onFavPress={() => handleToggleFavorite(item)}
+              onPress={() => handleActorPress(item.id)}
+            />
+          )}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          }
+        />
       )}
-    </SafeAreaWrapper>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#F9FAFB",
-    paddingHorizontal: 16,
-    paddingTop: 20,
+    flex: 1,
+    backgroundColor: '#f8f9fa',
   },
   searchContainer: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 16,
-  },
-  searchIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F9FAFB",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  searchInputContainer: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    height: 48,
-    gap: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: '#e0e0e0',
+    height: 44,
+  },
+  searchIcon: {
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: 15,
-    color: "#111827",
-    fontWeight: "500",
+    fontSize: 14,
+    color: '#333',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#fff',
+    alignItems: 'center',
   },
   filterButton: {
-    borderRadius: 26,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 8,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   filterButtonActive: {
-    shadowColor: "#FF6600",
-    shadowOpacity: 0.3,
+    backgroundColor: '#FF8C42',
+    borderColor: '#FF8C42',
   },
-  filterButtonGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 48,
-    paddingHorizontal: 16,
-    gap: 6,
-  },
-  filterButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  filterButtonTextActive: {
-    color: "#FFFFFF",
-  },
-
-  viewModeContainer: {
-    alignSelf: "center",
-    flexDirection: "row",
-    backgroundColor: "#F3F4F6",
-    borderRadius: 30,
-    padding: 4,
-    marginBottom: 20,
-    width: 260,
-    position: "relative",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  viewModeActiveBg: {
-    position: "absolute",
-    top: 4,
-    left: 4,
-    width: 124,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#FF6600",
-    shadowColor: "#FF6600",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  viewModeButton: {
-    flex: 1,
-    height: 44,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 6,
-    zIndex: 1,
-  },
-  viewModeText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#6B7280",
-  },
-  viewModeTextActive: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-  },
-  filtersPanel: {
-    marginBottom: 16,
-    padding: 18,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  filterSection: {
-    marginBottom: 16,
-  },
-  filterLabelContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 12,
-  },
-  filterLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#374151",
-  },
-  filterOptions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  filterBtn: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    backgroundColor: "#F9FAFB",
-    borderRadius: 22,
-    borderWidth: 1.5,
-    borderColor: "#E5E7EB",
-    overflow: "hidden",
-  },
-  filterBtnActive: {
-    borderColor: "#FF6600",
-  },
-  filterBtnText: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "600",
-  },
-  filterBtnTextActive: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-  },
-  acteursList: {
-    padding: 16,
-  },
-  acteurCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    marginBottom: 14,
-    padding: 16,
-    gap: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  acteurLogoContainer: {
-    width: 68,
-    height: 68,
-    borderRadius: 18,
-    overflow: "hidden",
-    backgroundColor: "#F9FAFB",
-    position: "relative",
-  },
-  acteurLogo: {
-    width: "100%",
-    height: "100%",
-  },
-  acteurContent: {
-    flex: 1,
-    gap: 4,
-  },
-  acteurNom: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 2,
-  },
-  acteurDomaine: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "500",
-    marginBottom: 6,
-  },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  acteurLocation: {
+  filterText: {
     fontSize: 13,
-    color: "#9CA3AF",
-    fontWeight: "500",
+    color: '#666',
+    fontWeight: '500',
   },
-  cardArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F9FAFB",
-    justifyContent: "center",
-    alignItems: "center",
+  filterTextActive: {
+    color: '#fff',
   },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
+  resetButton: {
+    padding: 6,
+    marginLeft: 8,
   },
-  emptyIconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "#F3F4F6",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  emptyText: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#374151",
-    marginTop: 12,
-  },
-  emptySubtext: {
-    fontSize: 15,
-    color: "#9CA3AF",
-    marginTop: 8,
-    fontWeight: "500",
-  },
-  // Map Styles
-  mapScrollView: {
+  listContainer: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
   },
-  mapContentContainer: {
-    paddingBottom: 40,
-  },
-  mapContainer: {
-    margin: 16,
-  },
-  mapBackground: {
-    height: MAP_HEIGHT,
-    borderRadius: 24,
-    padding: 16,
-    position: "relative",
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.5)",
-  },
-  mapHeader: {
-    alignItems: "center",
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  mapTitleContainer: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 16,
-    shadowColor: "#FF6600",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  mapTitle: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: "#FFFFFF",
-    letterSpacing: 6,
-    textAlign: "center",
-  },
-  mapSubtitle: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.9)",
-    marginTop: 4,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  cityLabel: {
-    position: "absolute",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(255,255,255,0.95)",
+  listContent: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: "rgba(243, 244, 246, 0.8)",
   },
-  cityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#3B82F6",
-  },
-  cityName: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  mapMarker: {
-    position: "absolute",
-    alignItems: "center",
-    zIndex: 10,
-  },
-  markerCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    padding: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 8,
-    borderWidth: 3,
-    borderColor: "#FFFFFF",
-    position: "relative",
-  },
-  markerLogo: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 20,
-  },
-  markerPulse: {
-    position: "absolute",
-    top: -3,
-    left: -3,
-    right: -3,
-    bottom: -3,
-    borderRadius: 28,
-    borderWidth: 2,
-    borderColor: "rgba(255, 102, 0, 0.3)",
-  },
-  markerTooltip: {
-    marginTop: 8,
-    backgroundColor: "#111827",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    maxWidth: 140,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  markerText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    textAlign: "center",
-  },
-  mapLegend: {
-    position: "absolute",
-    bottom: 16,
-    right: 16,
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  legendHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  actorCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
     marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  legendTitle: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: "#111827",
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
+  cardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
   },
-  legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+  logoContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FF6600',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-  legendText: {
+  logoPlaceholder: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  cardInfo: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    lineHeight: 18,
+  },
+  categoryText: {
     fontSize: 12,
-    color: "#6B7280",
-    fontWeight: "600",
+    color: '#FF6600',
+    fontWeight: '600',
+    marginTop: 2,
   },
-  mapStats: {
-    flexDirection: "row",
-    gap: 12,
+  favoriteButton: {
+    padding: 6,
+  },
+  description: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 16,
+    marginBottom: 8,
+  },
+  cardMeta: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 4,
+  },
+  cardFooter: {
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  contactButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#0066FF',
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  contactButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 100,
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
     marginTop: 16,
   },
-  statCard: {
-    flex: 1,
-    alignItems: "center",
-    padding: 18,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
+    textAlign: 'center',
   },
-  statIconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
+  retryButton: {
+    marginTop: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#0066FF',
+    borderRadius: 8,
   },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: "900",
-    color: "#111827",
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#6B7280",
-    fontWeight: "600",
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

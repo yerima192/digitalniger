@@ -1,21 +1,38 @@
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState } from "react";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Header from "../../components/Header";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import Toast from "../../components/Toast";
 
 export default function ChangerMotDePasse() {
   const [ancienMotDePasse, setAncienMotDePasse] = useState("");
   const [nouveauMotDePasse, setNouveauMotDePasse] = useState("");
   const [confirmerMotDePasse, setConfirmerMotDePasse] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
   
   const [showAncien, setShowAncien] = useState(false);
   const [showNouveau, setShowNouveau] = useState(false);
   const [showConfirmer, setShowConfirmer] = useState(false);
 
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
+
   return (
     <SafeAreaWrapper>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onHide={() => setShowToast(false)}
+        />
+      )}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Header
           title="Changer mon mot de passe"
@@ -213,7 +230,24 @@ export default function ChangerMotDePasse() {
 
         {/* Boutons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.saveButton} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.saveButton} 
+            activeOpacity={0.8}
+            onPress={() => {
+              if (ancienMotDePasse && nouveauMotDePasse && confirmerMotDePasse) {
+                if (nouveauMotDePasse === confirmerMotDePasse) {
+                  displayToast("Mot de passe modifié avec succès", "success");
+                  setAncienMotDePasse("");
+                  setNouveauMotDePasse("");
+                  setConfirmerMotDePasse("");
+                } else {
+                  displayToast("Les mots de passe ne correspondent pas", "error");
+                }
+              } else {
+                displayToast("Veuillez remplir tous les champs", "error");
+              }
+            }}
+          >
             <LinearGradient
               colors={["#FF7F27", "#FF6600"]}
               style={styles.saveButtonGradient}
@@ -223,7 +257,13 @@ export default function ChangerMotDePasse() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.cancelButton} activeOpacity={0.7}>
+          <TouchableOpacity 
+            style={styles.cancelButton} 
+            activeOpacity={0.7}
+            onPress={() => {
+              displayToast("Annulation", "info");
+            }}
+          >
             <Text style={styles.cancelButtonText}>Annuler</Text>
           </TouchableOpacity>
         </View>

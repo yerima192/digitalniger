@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState } from "react";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Header from "../../components/Header";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import Toast from "../../components/Toast";
 
 export default function ModifierInformations() {
   const [nom, setNom] = useState("Amadou");
@@ -12,9 +13,25 @@ export default function ModifierInformations() {
   const [telephone, setTelephone] = useState("+227 90 12 34 56");
   const [adresse, setAdresse] = useState("Quartier Plateau, Niamey");
   const [ville, setVille] = useState("Niamey");
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
+
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   return (
     <SafeAreaWrapper>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onHide={() => setShowToast(false)}
+        />
+      )}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Header
           title="Modifier mes informations"
@@ -200,7 +217,13 @@ export default function ModifierInformations() {
 
         {/* Bouton Enregistrer */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.saveButton} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.saveButton} 
+            activeOpacity={0.8}
+            onPress={() => {
+              displayToast("Modifications enregistrées avec succès", "success");
+            }}
+          >
             <LinearGradient
               colors={["#FF7F27", "#FF6600"]}
               style={styles.saveButtonGradient}
@@ -210,7 +233,13 @@ export default function ModifierInformations() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.cancelButton} activeOpacity={0.7}>
+          <TouchableOpacity 
+            style={styles.cancelButton} 
+            activeOpacity={0.7}
+            onPress={() => {
+              displayToast("Annulation", "info");
+            }}
+          >
             <Text style={styles.cancelButtonText}>Annuler</Text>
           </TouchableOpacity>
         </View>

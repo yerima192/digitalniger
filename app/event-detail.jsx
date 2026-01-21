@@ -3,17 +3,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
-  Image,
-  Linking,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    Linking,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import SafeAreaWrapper from "../components/SafeAreaWrapper";
+import Toast from "../components/Toast";
 import { useFavorites } from "../context/FavoritesContext";
 import { eventsData } from "../data/eventsData";
 
@@ -22,14 +22,23 @@ export default function EventDetailScreen() {
   const params = useLocalSearchParams();
   const { isEventFavorited, toggleEventFavorite } = useFavorites();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
 
-  const event = eventsData.find((e) => e.id === params.eventId);
+  const event = eventsData.find((e) => e.id === params.id);
 
   useEffect(() => {
     if (event) {
       setIsFavorite(isEventFavorited(event.id));
     }
-  }, [event]);
+  }, [event, isEventFavorited]);
+
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   if (!event) {
     return (
@@ -50,20 +59,37 @@ export default function EventDetailScreen() {
 
   const handleRegister = () => {
     if (event.registrationLink) {
-      Linking.openURL(event.registrationLink).catch(() => {
-        Alert.alert("Erreur", "Impossible d'ouvrir le lien d'inscription");
-      });
+      Linking.openURL(event.registrationLink)
+        .then(() => {
+          displayToast("Page d'inscription ouverte", "success");
+        })
+        .catch(() => {
+          displayToast("Impossible d'ouvrir le lien d'inscription", "error");
+        });
     }
   };
 
   const toggleFavorite = async () => {
     await toggleEventFavorite(event);
     setIsFavorite(!isFavorite);
+    displayToast(
+      !isFavorite ? "Ajouté aux favoris" : "Supprimé des favoris",
+      "success"
+    );
   };
 
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
+        {/* Toast Component */}
+        {showToast && (
+          <Toast
+            message={toastMessage}
+            type={toastType}
+            onHide={() => setShowToast(false)}
+          />
+        )}
+
         {/* Fixed Header Buttons */}
         <View style={styles.headerButtons}>
           <TouchableOpacity

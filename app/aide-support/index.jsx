@@ -1,12 +1,30 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
-import Header from "../../components/Header";
 import { router } from "expo-router";
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Header from "../../components/Header";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import Toast from "../../components/Toast";
 
 export default function AideSupport() {
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
+
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
   return (
     <SafeAreaWrapper>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onHide={() => setShowToast(false)}
+        />
+      )}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         
         <Header
@@ -24,7 +42,13 @@ export default function AideSupport() {
           </View>
 
           <View style={styles.card}>
-            <TouchableOpacity style={styles.row} onPress={() => router.push('questions-frequents-pose')}>
+            <TouchableOpacity 
+              style={styles.row} 
+              onPress={() => {
+                displayToast("Ouverture des questions fréquentes", "info");
+                router.push('questions-frequents-pose');
+              }}
+            >
               <View style={styles.left}>
                 <View style={[styles.iconCircle, { backgroundColor: "#E8F0FF" }]}>
                   <Ionicons name="help-circle-outline" size={24} color="#2563EB" />
@@ -39,7 +63,13 @@ export default function AideSupport() {
 
             <View style={styles.separator} />
 
-            <TouchableOpacity style={styles.row} onPress={() => router.push('contacter-le-support')}>
+            <TouchableOpacity 
+              style={styles.row} 
+              onPress={() => {
+                displayToast("Ouverture du formulaire de support", "info");
+                router.push('contacter-le-support');
+              }}
+            >
               <View style={styles.left}>
                 <View style={[styles.iconCircle, { backgroundColor: "#ECFDF5" }]}>
                   <Ionicons name="chatbubble-ellipses-outline" size={24} color="#059669" />

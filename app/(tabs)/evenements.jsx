@@ -1,503 +1,416 @@
-import React, { useState } from "react";
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import Header from "../../components/Header";
-import { eventsData } from "../../data/eventsData";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+    FlatList,
+    ImageBackground,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import Header from '../../components/Header';
+import { showToast } from '../../components/Toast';
+import { useFavorites } from '../../context/FavoritesContext';
+import { eventsData } from '../../data/eventsData';
 
-export default function EvenementsScreen() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedType, setSelectedType] = useState("Tous");
-  const [selectedPrice, setSelectedPrice] = useState("Tous");
+// SearchBar
+const SearchBar = ({ value, onChangeText }) => (
+  <View style={styles.searchContainer}>
+    <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+    <TextInput
+      style={styles.searchInput}
+      placeholder="Chercher un événement..."
+      value={value}
+      onChangeText={onChangeText}
+      placeholderTextColor="#999"
+    />
+    {value ? (
+      <TouchableOpacity onPress={() => onChangeText('')}>
+        <Ionicons name="close-circle" size={20} color="#999" />
+      </TouchableOpacity>
+    ) : null}
+  </View>
+);
 
-  const filteredEvents = eventsData.filter((event) => {
-    const matchesSearch = event.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesType = selectedType === "Tous" || event.type === selectedType;
-    const matchesPrice =
-      selectedPrice === "Tous" || event.price === selectedPrice;
-    return matchesSearch && matchesType && matchesPrice;
-  });
-
-  const renderEventCard = ({ item }) => (
-    <TouchableOpacity
-      style={styles.eventCard}
-      onPress={() =>
-        router.push({
-          pathname: "/event-detail",
-          params: { eventId: item.id },
-        })
-      }
-      activeOpacity={0.7}
-    >
-      <View style={styles.eventImageContainer}>
-        <Image source={{ uri: item.image }} style={styles.eventImage} />
-        <LinearGradient
-          colors={["transparent", "rgba(0, 0, 0, 0.3)"]}
-          style={styles.imageGradient}
-        />
-        <View
+// FilterBar
+const FilterBar = ({ activeFilter, onFilterChange, onReset }) => (
+  <View style={styles.filterContainer}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      {['Tous', 'Hackathon', 'Atelier', 'Formation', 'Conférence'].map((filter) => (
+        <TouchableOpacity
+          key={filter}
           style={[
-            styles.priceBadge,
-            item.price === "Gratuit" ? styles.gratuitBadge : styles.payantBadge,
+            styles.filterButton,
+            activeFilter === filter && styles.filterButtonActive,
           ]}
+          onPress={() => onFilterChange(filter)}
         >
           <Text
             style={[
-              styles.priceBadgeText,
-              item.price === "Gratuit" ? styles.gratuitText : styles.payantText,
+              styles.filterText,
+              activeFilter === filter && styles.filterTextActive,
             ]}
           >
-            {item.price}
+            {filter}
           </Text>
-        </View>
-      </View>
-      <View style={styles.eventCardContent}>
-        <View style={styles.typeContainer}>
-          <View style={styles.typeDot} />
-          <Text style={styles.eventType}>{item.type}</Text>
-        </View>
-        <Text style={styles.eventTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <View style={styles.eventDateContainer}>
-          <View style={styles.iconWrapper}>
-            <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-          </View>
-          <Text style={styles.eventDate}>{item.date}</Text>
-        </View>
-        <View style={styles.eventLocationContainer}>
-          <View style={styles.iconWrapper}>
-            <Ionicons name="location-outline" size={16} color="#6B7280" />
-          </View>
-          <Text style={styles.eventLocation}>
-            {item.city}, {item.country}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+    {activeFilter !== 'Tous' && (
+      <TouchableOpacity onPress={onReset} style={styles.resetButton}>
+        <Ionicons name="close" size={18} color="#999" />
+      </TouchableOpacity>
+    )}
+  </View>
+);
 
-  const FilterButton = ({ label, selected, onPress }) => (
-    <TouchableOpacity
-      style={[styles.filterBtn, selected && styles.filterBtnActive]}
-      onPress={onPress}
-      activeOpacity={0.7}
+// EventCard
+const EventCard = ({ event, isFavorited, onFavPress, onPress }) => (
+  <TouchableOpacity
+    style={styles.eventCard}
+    onPress={onPress}
+    activeOpacity={0.8}
+  >
+    <ImageBackground
+      source={{ uri: event.image || 'https://via.placeholder.com/400x200' }}
+      style={styles.cardImage}
+      imageStyle={{ borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
     >
-      <Text
-        style={[styles.filterBtnText, selected && styles.filterBtnTextActive]}
+      <View style={styles.cardBadge}>
+        <Text style={styles.cardBadgeText}>{event.type}</Text>
+      </View>
+      <TouchableOpacity
+        style={styles.favoriteIcon}
+        onPress={onFavPress}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        {label}
+        <MaterialCommunityIcons
+          name={isFavorited ? 'heart' : 'heart-outline'}
+          size={24}
+          color={isFavorited ? '#FF3B30' : '#fff'}
+        />
+      </TouchableOpacity>
+    </ImageBackground>
+
+    <View style={styles.cardContent}>
+      <Text style={styles.cardTitle} numberOfLines={2}>
+        {event.title}
       </Text>
-    </TouchableOpacity>
-  );
+
+      <View style={styles.cardMeta}>
+        <Ionicons name="calendar" size={14} color="#FF6600" />
+        <Text style={styles.cardMetaText}>{event.date}</Text>
+      </View>
+
+      <View style={styles.cardMeta}>
+        <Ionicons name="time" size={14} color="#FF6600" />
+        <Text style={styles.cardMetaText}>{event.time}</Text>
+      </View>
+
+      <View style={styles.cardMeta}>
+        <Ionicons name="location" size={14} color="#FF6600" />
+        <Text style={styles.cardMetaText}>{event.city}</Text>
+      </View>
+
+      <View style={styles.cardFooter}>
+        <Text style={styles.priceText}>{event.price}</Text>
+        <Text style={styles.participantsText}>
+          {event.registered}/{event.capacity} inscrits
+        </Text>
+      </View>
+    </View>
+  </TouchableOpacity>
+);
+
+// Main Screen
+export default function EvenementsScreen() {
+  const router = useRouter();
+  const { events, toggleEventFavorite } = useFavorites();
+  const [searchText, setSearchText] = useState('');
+  const [activeFilter, setActiveFilter] = useState('Tous');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Filtrer
+  const filteredEvents = eventsData.filter((event) => {
+    const matchesSearch =
+      (event.title && event.title.toLowerCase().includes((searchText || '').toLowerCase())) ||
+      (event.city && event.city.toLowerCase().includes((searchText || '').toLowerCase()));
+
+    const matchesFilter =
+      activeFilter === 'Tous' || event.type === activeFilter;
+
+    return matchesSearch && matchesFilter;
+  });
+
+  // Refresh
+  const onRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+      showToast('Données actualisées!', 'success');
+    }, 1500);
+  }, []);
+
+  // Toggle favoris
+  const handleToggleFavorite = (event) => {
+    toggleEventFavorite(event);
+    const isFavorited = events.some((e) => e.id === event.id);
+    showToast(
+      isFavorited ? 'Retiré des favoris' : 'Ajouté aux favoris',
+      'info'
+    );
+  };
+
+  // Naviguer
+  const handleEventPress = (eventId) => {
+    router.push(`/event-detail?id=${eventId}`);
+  };
+
+  const handleResetFilter = () => {
+    setActiveFilter('Tous');
+    showToast('Filtre réinitialisé', 'success');
+  };
 
   return (
-    <SafeAreaWrapper>
-      {/* Header */}
-      <Header
-        title="Événements"
-        subtitle="Trouvez les derniers événements tech"
-        badgeCount={filteredEvents.length}
+    <SafeAreaView style={styles.container}>
+      <Header title="Événements" showNotification={true} />
+
+      <SearchBar value={searchText} onChangeText={setSearchText} />
+
+      <FilterBar
+        activeFilter={activeFilter}
+        onFilterChange={(filter) => {
+          setActiveFilter(filter);
+          showToast(`Filtre: ${filter}`, 'info');
+        }}
+        onReset={handleResetFilter}
       />
 
-      <View style={styles.container}>
-        {/* Search and Filter */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchInputContainer}>
-            <View style={styles.searchIconCircle}>
-              <Ionicons name="search-outline" size={18} color="#6B7280" />
-            </View>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Rechercher un événement..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="#9CA3AF"
+      {filteredEvents.length === 0 ? (
+        <ScrollView
+          style={styles.listContainer}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View style={styles.emptyState}>
+            <MaterialCommunityIcons
+              name="calendar-search"
+              size={64}
+              color="#ddd"
             />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <Ionicons name="close-circle" size={18} color="#9CA3AF" />
-              </TouchableOpacity>
-            )}
-          </View>
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              showFilters && styles.filterButtonActive,
-            ]}
-            onPress={() => setShowFilters(!showFilters)}
-            activeOpacity={0.7}
-          >
-            <LinearGradient
-              colors={
-                showFilters ? ["#FF7F27", "#FF6600"] : ["#FFFFFF", "#FFFFFF"]
-              }
-              style={styles.filterButtonGradient}
-            >
-              <Ionicons
-                name="options-outline"
-                size={20}
-                color={showFilters ? "#FFFFFF" : "#111827"}
-              />
-              <Text
-                style={[
-                  styles.filterButtonText,
-                  showFilters && styles.filterButtonTextActive,
-                ]}
-              >
-                Filtres
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-        {/* Filters Panel */}
-        {showFilters && (
-          <View style={styles.filtersPanel}>
-            <View style={styles.filterSection}>
-              <View style={styles.filterLabelContainer}>
-                <Ionicons name="pricetag-outline" size={16} color="#6B7280" />
-                <Text style={styles.filterLabel}>Type</Text>
-              </View>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.filterOptions}>
-                  {["Tous", "Conférence", "Atelier", "Meetup", "Formation"].map(
-                    (type) => (
-                      <FilterButton
-                        key={type}
-                        label={type}
-                        selected={selectedType === type}
-                        onPress={() => setSelectedType(type)}
-                      />
-                    )
-                  )}
-                </View>
-              </ScrollView>
-            </View>
-            <View style={styles.filterSection}>
-              <View style={styles.filterLabelContainer}>
-                <Ionicons name="cash-outline" size={16} color="#6B7280" />
-                <Text style={styles.filterLabel}>Prix</Text>
-              </View>
-              <View style={styles.filterOptions}>
-                {["Tous", "Gratuit", "Payant"].map((price) => (
-                  <FilterButton
-                    key={price}
-                    label={price}
-                    selected={selectedPrice === price}
-                    onPress={() => setSelectedPrice(price)}
-                  />
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
-      </View>
-
-      {/* Events List */}
-      <FlatList
-        data={filteredEvents}
-        renderItem={renderEventCard}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.eventsList}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconCircle}>
-              <Ionicons name="calendar-outline" size={48} color="#9CA3AF" />
-            </View>
-            <Text style={styles.emptyText}>Aucun événement trouvé</Text>
-            <Text style={styles.emptySubtext}>
-              Essayez de modifier vos filtres
+            <Text style={styles.emptyTitle}>Aucun événement trouvé</Text>
+            <Text style={styles.emptySubtitle}>
+              Essayez d&apos;autres critères de recherche
             </Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={handleResetFilter}
+            >
+              <Text style={styles.retryButtonText}>Réinitialiser les filtres</Text>
+            </TouchableOpacity>
           </View>
-        }
-      />
-      <View style={{ height: 0 }} />
-    </SafeAreaWrapper>
+        </ScrollView>
+      ) : (
+        <FlatList
+          data={filteredEvents}
+          renderItem={({ item }) => (
+            <EventCard
+              event={item}
+              isFavorited={events.some((e) => e.id === item.id)}
+              onFavPress={() => handleToggleFavorite(item)}
+              onPress={() => handleEventPress(item.id)}
+            />
+          )}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          }
+        />
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#F9FAFB",
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 12,
+    flex: 1,
+    backgroundColor: '#f8f9fa',
   },
   searchContainer: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  searchInputContainer: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    height: 48,
-    gap: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: '#e0e0e0',
+    height: 44,
   },
-  searchIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F9FAFB",
-    justifyContent: "center",
-    alignItems: "center",
+  searchIcon: {
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: 12,
-    color: "#111827",
-    fontWeight: "500",
-  },
-  filterButton: {
-    borderRadius: 24,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  filterButtonActive: {
-    shadowColor: "#FF6600",
-    shadowOpacity: 0.3,
-  },
-  filterButtonGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    height: 48,
-    gap: 6,
-  },
-  filterButtonText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
+    color: '#333',
   },
-  filterButtonTextActive: {
-    color: "#FFFFFF",
-  },
-  filtersPanel: {
-    marginTop: 16,
-    padding: 16,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  filterSection: {
-    marginBottom: 12,
-  },
-  filterLabelContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 10,
-  },
-  filterLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#374151",
-  },
-  filterOptions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  filterBtn: {
+  filterContainer: {
+    flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: "#F9FAFB",
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  filterButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 8,
     borderRadius: 20,
+    backgroundColor: '#f0f0f0',
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: '#e0e0e0',
   },
-  filterBtnActive: {
-    backgroundColor: "#FFF7ED",
-    borderColor: "#FF6600",
+  filterButtonActive: {
+    backgroundColor: '#FF8C42',
+    borderColor: '#FF8C42',
   },
-  filterBtnText: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "500",
+  filterText: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
   },
-  filterBtnTextActive: {
-    color: "#FF6600",
-    fontWeight: "700",
+  filterTextActive: {
+    color: '#fff',
   },
-  eventsList: {
-    padding: 16,
+  resetButton: {
+    padding: 6,
+    marginLeft: 8,
+  },
+  listContainer: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   eventCard: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    marginBottom: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  eventImageContainer: {
-    position: "relative",
-    height: 180,
-  },
-  eventImage: {
-    width: "100%",
-    height: "100%",
-  },
-  imageGradient: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-  },
-  priceBadge: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    shadowColor: "#000",
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 3,
   },
-  gratuitBadge: {
-    backgroundColor: "#D1FAE5",
+  cardImage: {
+    width: '100%',
+    height: 160,
+    backgroundColor: '#e0e0e0',
   },
-  payantBadge: {
-    backgroundColor: "#FED7AA",
+  cardBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: '#FF6600',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
-  priceBadgeText: {
-    fontSize: 12,
-    fontWeight: "700",
+  cardBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '600',
   },
-  gratuitText: {
-    color: "#059669",
+  favoriteIcon: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  payantText: {
-    color: "#EA580C",
+  cardContent: {
+    padding: 12,
   },
-  eventCardContent: {
-    padding: 16,
-  },
-  typeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1a1a1a',
     marginBottom: 8,
+    lineHeight: 18,
   },
-  typeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#FF6600",
+  cardMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
   },
-  eventType: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#FF6600",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+  cardMetaText: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 6,
   },
-  eventTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 12,
-    lineHeight: 24,
-  },
-  eventDateContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 6,
-  },
-  eventLocationContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  iconWrapper: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#F9FAFB",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  eventDate: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "500",
-  },
-  eventLocation: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "500",
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  emptyIconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#F3F4F6",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#374151",
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
   },
-  emptySubtext: {
+  priceText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#10B981',
+  },
+  participantsText: {
+    fontSize: 12,
+    color: '#999',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 100,
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginTop: 16,
+  },
+  emptySubtitle: {
     fontSize: 14,
-    color: "#9CA3AF",
-    marginTop: 6,
-    fontWeight: "500",
+    color: '#999',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#0066FF',
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

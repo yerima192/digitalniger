@@ -25,7 +25,14 @@ export const USER_TYPES = {
   ADMIN: "admin"
 };
 
-// Tranches d'âge
+// Roles disponibles
+export const USER_ROLES = {
+  USER: "user",
+  ADMIN: "admin",
+  SUPER_ADMIN: "super_admin"
+};
+
+// Tranches d'âge (selon cahier des charges)
 export const AGE_RANGES = [
   "18-21",
   "22-25",
@@ -57,6 +64,22 @@ export const NIGERIA_LOCATIONS = {
   "Régions": ["Niamey", "Agadez", "Diffa", "Dosso", "Maradi", "Tahoua", "Tillabery", "Zinder"]
 };
 
+// Validations utilitaires
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const validatePassword = (password) => {
+  return password && password.length >= 6;
+};
+
+const validatePhone = (phone) => {
+  // Format: +227 XX XX XX XX ou sans +
+  const phoneRegex = /^(\+227|0)?[2-9]\d{7}$/;
+  return phoneRegex.test(phone.replace(/\s/g, ''));
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,13 +109,23 @@ export const AuthProvider = ({ children }) => {
   // Connexion
   const login = async (email, password) => {
     try {
+      // Validations
+      if (!validateEmail(email)) {
+        return { success: false, error: "Email invalide" };
+      }
+
+      if (!validatePassword(password)) {
+        return { success: false, error: "Mot de passe invalide" };
+      }
+
       // Simulation d'une réponse API (à remplacer)
       const mockUser = {
         id: "1",
         name: "John Doe",
-        email: email,
+        email: email.toLowerCase(),
         avatar: "https://ui-avatars.com/api/?name=John+Doe",
         userType: USER_TYPES.PROFESSIONAL,
+        role: USER_ROLES.USER,
         gender: "Homme",
         ageRange: "26-34",
         city: "Niamey",
@@ -125,13 +158,27 @@ export const AuthProvider = ({ children }) => {
   // Inscription
   const signup = async (name, email, password) => {
     try {
+      // Validations
+      if (!name || name.trim().length < 2) {
+        return { success: false, error: "Le nom doit contenir au moins 2 caractères" };
+      }
+      
+      if (!validateEmail(email)) {
+        return { success: false, error: "Email invalide" };
+      }
+      
+      if (!validatePassword(password)) {
+        return { success: false, error: "Le mot de passe doit contenir au moins 6 caractères" };
+      }
+
       // Simulation d'une réponse API (à remplacer)
       const newUser = {
         id: Date.now().toString(),
-        name: name,
-        email: email,
+        name: name.trim(),
+        email: email.toLowerCase(),
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
         userType: null, // À définir après signup
+        role: USER_ROLES.USER,
         gender: null,
         ageRange: null,
         city: null,
@@ -197,9 +244,18 @@ export const AuthProvider = ({ children }) => {
   // Mettre à jour le profil
   const updateProfile = async (updates) => {
     try {
+      // Validations
+      if (updates.phone && !validatePhone(updates.phone)) {
+        return { success: false, error: "Numéro de téléphone invalide" };
+      }
+
+      if (updates.email && !validateEmail(updates.email)) {
+        return { success: false, error: "Email invalide" };
+      }
+
       const updatedUser = { ...user, ...updates };
       
-      // Marquer le profil comme complet si tous les champs sont remplis
+      // Marquer le profil comme complet si tous les champs obligatoires sont remplis
       if (updates.userType && updates.gender && updates.ageRange && updates.city) {
         updatedUser.profileComplete = true;
       }
@@ -209,7 +265,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: updatedUser };
     } catch (error) {
       console.error("Erreur de mise à jour du profil:", error);
-      return { success: false };
+      return { success: false, error: "Erreur lors de la mise à jour du profil" };
     }
   };
 

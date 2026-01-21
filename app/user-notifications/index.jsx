@@ -1,12 +1,22 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState } from "react";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Header from "../../components/Header";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import Toast from "../../components/Toast";
 
 export default function NotificationsScreen() {
   const [filter, setFilter] = useState("Toutes");
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
+
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   const notifications = [
     {
@@ -119,6 +129,13 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaWrapper>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onHide={() => setShowToast(false)}
+        />
+      )}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Header
           title="Notifications"
@@ -128,7 +145,13 @@ export default function NotificationsScreen() {
 
         {/* Actions rapides */}
         <View style={styles.actionsSection}>
-          <TouchableOpacity style={styles.actionButton} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.actionButton} 
+            activeOpacity={0.8}
+            onPress={() => {
+              displayToast("Toutes les notifications marquées comme lues", "success");
+            }}
+          >
             <LinearGradient
               colors={["#E0E7FF", "#C7D2FE"]}
               style={styles.actionButtonGradient}
@@ -138,7 +161,13 @@ export default function NotificationsScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.actionButton} 
+            activeOpacity={0.8}
+            onPress={() => {
+              displayToast("Toutes les notifications supprimées", "success");
+            }}
+          >
             <View style={styles.actionButtonOutline}>
               <Ionicons name="trash-outline" size={20} color="#DC2626" />
               <Text style={[styles.actionButtonText, { color: "#DC2626" }]}>Tout effacer</Text>
@@ -157,7 +186,10 @@ export default function NotificationsScreen() {
                     styles.filterChip,
                     filter === item && styles.filterChipActive
                   ]}
-                  onPress={() => setFilter(item)}
+                  onPress={() => {
+                    setFilter(item);
+                    displayToast(`Filtre: ${item}`, "info");
+                  }}
                   activeOpacity={0.7}
                 >
                   {filter === item && (

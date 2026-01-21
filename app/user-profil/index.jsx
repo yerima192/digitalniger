@@ -1,11 +1,23 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import { useState } from "react";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Header from "../../components/Header";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import Toast from "../../components/Toast";
 
 export default function ProfilScreen() {
+  // const { user } = useAuth();
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
+
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
   const stats = [
     { icon: "heart", label: "Favoris", count: "12", gradient: ["#FEE2E2", "#FECACA"], color: "#DC2626" },
     { icon: "calendar", label: "Événements", count: "8", gradient: ["#FFE8D6", "#FFD4B3"], color: "#FF6600" },
@@ -70,6 +82,13 @@ export default function ProfilScreen() {
 
   return (
     <SafeAreaWrapper>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onHide={() => setShowToast(false)}
+        />
+      )}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Header
           title="Mon Profil"
@@ -148,7 +167,12 @@ export default function ProfilScreen() {
                 <TouchableOpacity 
                   style={styles.row}
                   activeOpacity={0.7}
-                  onPress={() => item.route && router.push(item.route)}
+                  onPress={() => {
+                    if (item.route) {
+                      displayToast(`Ouverture de ${item.label}`, "info");
+                      router.push(item.route);
+                    }
+                  }}
                 >
                   <View style={styles.left}>
                     <LinearGradient

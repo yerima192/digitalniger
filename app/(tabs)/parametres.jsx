@@ -1,25 +1,35 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Switch,
-  Animated,
-  Alert,
-} from "react-native";
-import { useEffect, useRef, useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import Header from "../../components/Header";
 import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import {
+    Alert,
+    Animated,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import Header from "../../components/Header";
 import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import Toast from "../../components/Toast";
 import { useAuth } from "../../context/AuthContext";
 
 export default function ParametresScreen() {
   const [notificationsPush, setNotificationsPush] = useState(true);
   const [modeHorsLigne, setModeHorsLigne] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
   const animation = useRef(new Animated.Value(1)).current;
+
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   useEffect(() => {
     Animated.spring(animation, {
@@ -32,6 +42,22 @@ export default function ParametresScreen() {
   const { logout, } = useAuth();
   const router = useRouter();
 
+  const handleNotificationsChange = (value) => {
+    setNotificationsPush(value);
+    displayToast(
+      value ? "Notifications activées" : "Notifications désactivées",
+      "success"
+    );
+  };
+
+  const handleOfflineModeChange = (value) => {
+    setModeHorsLigne(value);
+    displayToast(
+      value ? "Mode hors ligne activé" : "Mode hors ligne désactivé",
+      "success"
+    );
+  };
+
   const handleLogout = () => {
     Alert.alert("Déconnexion", "Êtes-vous sûr de vouloir vous déconnecter ?", [
       {
@@ -42,9 +68,12 @@ export default function ParametresScreen() {
         text: "Déconnexion",
         style: "destructive",
         onPress: async () => {
+          displayToast("Déconnexion en cours...", "info");
           const result = await logout();
           if (result.success) {
             router.replace("(auth)");
+          } else {
+            displayToast("Erreur lors de la déconnexion", "error");
           }
         },
       },
@@ -53,6 +82,13 @@ export default function ParametresScreen() {
 
   return (
     <SafeAreaWrapper>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onHide={() => setShowToast(false)}
+        />
+      )}
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Header
@@ -89,7 +125,7 @@ export default function ParametresScreen() {
               <Animated.View style={{ transform: [{ scale: animation }] }}>
                 <Switch
                   value={notificationsPush}
-                  onValueChange={setNotificationsPush}
+                  onValueChange={handleNotificationsChange}
                   trackColor={{ false: "#E5E7EB", true: "#FFB380" }}
                   thumbColor={notificationsPush ? "#FF6600" : "#FFFFFF"}
                   ios_backgroundColor="#E5E7EB"
@@ -121,7 +157,7 @@ export default function ParametresScreen() {
               </View>
               <Switch
                 value={modeHorsLigne}
-                onValueChange={setModeHorsLigne}
+                onValueChange={handleOfflineModeChange}
                 trackColor={{ false: "#E5E7EB", true: "#FFB380" }}
                 thumbColor={modeHorsLigne ? "#FF6600" : "#FFFFFF"}
                 ios_backgroundColor="#E5E7EB"

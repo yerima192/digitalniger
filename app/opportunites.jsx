@@ -1,520 +1,426 @@
-import React, { useState } from "react";
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   FlatList,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import Header from "../components/Header";
-import { opportunitesData } from "../data/opportunitesData";
-import SafeAreaWrapper from "../components/SafeAreaWrapper";
+  View,
+} from 'react-native';
+import Header from '../components/Header';
+import { showToast } from '../components/Toast';
+import { useFavorites } from '../context/FavoritesContext';
+import { opportunitesData } from '../data/opportunitesData';
 
-export default function OpportunitesScreen() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedType, setSelectedType] = useState("Tous");
-  const [selectedCategorie, setSelectedCategorie] = useState("Tous");
+// SearchBar
+const SearchBar = ({ value, onChangeText }) => (
+  <View style={styles.searchContainer}>
+    <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+    <TextInput
+      style={styles.searchInput}
+      placeholder="Chercher une opportunité..."
+      value={value}
+      onChangeText={onChangeText}
+      placeholderTextColor="#999"
+    />
+    {value ? (
+      <TouchableOpacity onPress={() => onChangeText('')}>
+        <Ionicons name="close-circle" size={20} color="#999" />
+      </TouchableOpacity>
+    ) : null}
+  </View>
+);
 
-  const filteredOpportunites = opportunitesData.filter((opp) => {
-    const matchesSearch = opp.titre
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesType = selectedType === "Tous" || opp.type === selectedType;
-    const matchesCategorie =
-      selectedCategorie === "Tous" || opp.categorie === selectedCategorie;
-    return matchesSearch && matchesType && matchesCategorie;
-  });
-
-  const renderOpportuniteCard = ({ item }) => (
-    <TouchableOpacity
-      style={styles.oppCard}
-      onPress={() =>
-        router.push({
-          pathname: "/opportunite-detail",
-          params: { opportuniteId: item.id },
-        })
-      }
-      activeOpacity={0.7}
-    >
-      <View style={styles.oppMain}>
-        <View
+// FilterBar
+const FilterBar = ({ activeFilter, onFilterChange, onReset }) => (
+  <View style={styles.filterContainer}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      {['Tous', 'Incubation', 'Bourse', 'Formation', 'Stage', 'Appel à projets'].map((filter) => (
+        <TouchableOpacity
+          key={filter}
           style={[
-            styles.oppIconContainer,
-            { backgroundColor: `${item.color}15` },
+            styles.filterButton,
+            activeFilter === filter && styles.filterButtonActive,
           ]}
+          onPress={() => onFilterChange(filter)}
         >
-          <Ionicons name={item.icon} size={24} color={item.color} />
-        </View>
-
-        <View style={styles.oppContent}>
-          <View style={styles.oppTop}>
-            <Text style={[styles.typeText, { color: item.color }]}>
-              {item.type.toUpperCase()}
-            </Text>
-            {item.montant && (
-              <View style={styles.montantBadge}>
-                <Text style={styles.montantText}>{item.montant}</Text>
-              </View>
-            )}
-          </View>
-
-          <Text style={styles.oppTitle} numberOfLines={2}>
-            {item.titre}
+          <Text
+            style={[
+              styles.filterText,
+              activeFilter === filter && styles.filterTextActive,
+            ]}
+          >
+            {filter}
           </Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+    {activeFilter !== 'Tous' && (
+      <TouchableOpacity onPress={onReset} style={styles.resetButton}>
+        <Ionicons name="close" size={18} color="#999" />
+      </TouchableOpacity>
+    )}
+  </View>
+);
 
-          <Text style={styles.oppOrganisme} numberOfLines={1}>
-            Par {item.organisation}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.oppFooter}>
-        <View style={styles.oppInfo}>
-          <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
-          <Text style={styles.infoText}>{item.deadline}</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
-      </View>
-    </TouchableOpacity>
-  );
-
-  const FilterButton = ({ label, selected, onPress }) => (
-    <TouchableOpacity
-      style={[styles.filterBtn, selected && styles.filterBtnActive]}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <Text
-        style={[styles.filterBtnText, selected && styles.filterBtnTextActive]}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
+// OpportunityCard
+const OpportunityCard = ({ opp, isFavorited, onFavPress, onPress }) => {
+  const getTypeColor = (type) => {
+    const colors = {
+      'Incubation': '#FF6600',
+      'Bourse': '#10B981',
+      'Formation': '#FF8C42',
+      'Stage': '#A855F7',
+      'Appel à projets': '#F59E0B',
+    };
+    return colors[type] || '#999';
+  };
 
   return (
-    <SafeAreaWrapper>
-      <Header
-        title="Opportunités"
-        subtitle="Découvrez les opportunités tech"
-        badgeCount={filteredOpportunites.length}
-      />
-
-      <View style={styles.container}>
-        {/* Search */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchInputContainer}>
-            <View style={styles.searchIconCircle}>
-              <Ionicons name="search-outline" size={18} color="#6B7280" />
-            </View>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Rechercher une opportunité..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="#9CA3AF"
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <Ionicons name="close-circle" size={18} color="#9CA3AF" />
-              </TouchableOpacity>
-            )}
-          </View>
+    <TouchableOpacity
+      style={styles.oppCard}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <View style={styles.cardHeader}>
+        <View
+          style={[
+            styles.typeBadge,
+            { backgroundColor: getTypeColor(opp.type) },
+          ]}
+        >
+          <Text style={styles.typeBadgeText}>{opp.type}</Text>
         </View>
 
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              showFilters && styles.filterButtonActive,
-            ]}
-            onPress={() => setShowFilters(!showFilters)}
-            activeOpacity={0.7}
-          >
-            <LinearGradient
-              colors={
-                showFilters ? ["#FF7F27", "#FF6600"] : ["#FFFFFF", "#FFFFFF"]
-              }
-              style={styles.filterButtonGradient}
-            >
-              <Ionicons
-                name="options-outline"
-                size={20}
-                color={showFilters ? "#FFFFFF" : "#111827"}
-              />
-              <Text
-                style={[
-                  styles.filterButtonText,
-                  showFilters && styles.filterButtonTextActive,
-                ]}
-              >
-                Filtres
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.subscribeButton} activeOpacity={0.7}>
-            <LinearGradient
-              colors={["#F9FAFB", "#F9FAFB"]}
-              style={styles.subscribeGradient}
-            >
-              <Ionicons name="notifications" size={20} color="#FF7F27" />
-              <Text style={styles.subscribeText}>
-                S&apos;abonner aux alertes
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-        {/* Filters Panel */}
-        {showFilters && (
-          <View style={styles.filtersPanel}>
-            <View style={styles.filterSection}>
-              <View style={styles.filterLabelContainer}>
-                <Ionicons name="pricetag-outline" size={16} color="#6B7280" />
-                <Text style={styles.filterLabel}>Type</Text>
-              </View>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.filterOptions}>
-                  {[
-                    "Tous",
-                    "Appel à projets",
-                    "Bourse",
-                    "Formation",
-                    "Emploi",
-                    "Concours",
-                    "Mentorat",
-                    "Hackathon",
-                  ].map((type) => (
-                    <FilterButton
-                      key={type}
-                      label={type}
-                      selected={selectedType === type}
-                      onPress={() => setSelectedType(type)}
-                    />
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
-            <View style={styles.filterSection}>
-              <View style={styles.filterLabelContainer}>
-                <Ionicons name="albums-outline" size={16} color="#6B7280" />
-                <Text style={styles.filterLabel}>Catégorie</Text>
-              </View>
-              <View style={styles.filterOptions}>
-                {[
-                  "Tous",
-                  "Incubation",
-                  "Formation",
-                  "Recrutement",
-                  "Compétition",
-                  "Accompagnement",
-                ].map((cat) => (
-                  <FilterButton
-                    key={cat}
-                    label={cat}
-                    selected={selectedCategorie === cat}
-                    onPress={() => setSelectedCategorie(cat)}
-                  />
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={onFavPress}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <MaterialCommunityIcons
+            name={isFavorited ? 'heart' : 'heart-outline'}
+            size={20}
+            color={isFavorited ? '#FF3B30' : getTypeColor(opp.type)}
+          />
+        </TouchableOpacity>
       </View>
 
-      {/* Opportunites List */}
-      <FlatList
-        data={filteredOpportunites}
-        renderItem={renderOpportuniteCard}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.oppList}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconCircle}>
-              <Ionicons name="briefcase-outline" size={48} color="#9CA3AF" />
-            </View>
-            <Text style={styles.emptyText}>Aucune opportunité trouvée</Text>
-            <Text style={styles.emptySubtext}>
-              Essayez de modifier vos filtres
-            </Text>
+      <Text style={styles.cardTitle} numberOfLines={2}>
+        {opp.titre}
+      </Text>
+
+      <Text style={styles.organization}>{opp.organisation}</Text>
+
+      <View style={styles.cardMeta}>
+        <Ionicons name="calendar" size={13} color="#666" />
+        <Text style={styles.metaText}>Deadline: {opp.deadline}</Text>
+      </View>
+
+      {opp.montant && (
+        <View style={styles.cardMeta}>
+          <MaterialCommunityIcons name="cash" size={13} color="#10B981" />
+          <Text style={styles.metaTextValue}>{opp.montant}</Text>
+        </View>
+      )}
+
+      <View style={styles.tagsContainer}>
+        {opp.tags?.slice(0, 2).map((tag, idx) => (
+          <View key={idx} style={styles.tag}>
+            <Text style={styles.tagText}>{tag}</Text>
           </View>
-        }
+        ))}
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+// Main Screen
+export default function OpportunitesScreen() {
+  const router = useRouter();
+  const { opportunities, toggleOpportunityFavorite } = useFavorites();
+  const [searchText, setSearchText] = useState('');
+  const [activeFilter, setActiveFilter] = useState('Tous');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Filtrer
+  const filteredOpps = opportunitesData.filter((opp) => {
+    const matchesSearch =
+      (opp.titre && opp.titre.toLowerCase().includes((searchText || '').toLowerCase())) ||
+      (opp.organisation && opp.organisation.toLowerCase().includes((searchText || '').toLowerCase()));
+
+    const matchesFilter =
+      activeFilter === 'Tous' || opp.type === activeFilter;
+
+    return matchesSearch && matchesFilter;
+  });
+
+  // Refresh
+  const onRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+      showToast('Données actualisées!', 'success');
+    }, 1500);
+  }, []);
+
+  // Toggle favoris
+  const handleToggleFavorite = (opp) => {
+    toggleOpportunityFavorite(opp);
+    const isFavorited = opportunities.some((o) => o.id === opp.id);
+    showToast(
+      isFavorited ? 'Retiré des favoris' : 'Ajouté aux favoris',
+      'info'
+    );
+  };
+
+  // Naviguer
+  const handleOppPress = (oppId) => {
+    router.push(`/opportunite-detail?id=${oppId}`);
+  };
+
+  const handleResetFilter = () => {
+    setActiveFilter('Tous');
+    showToast('Filtre réinitialisé', 'success');
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Header title="Opportunités" showNotification={true} />
+
+      <SearchBar value={searchText} onChangeText={setSearchText} />
+
+      <FilterBar
+        activeFilter={activeFilter}
+        onFilterChange={(filter) => {
+          setActiveFilter(filter);
+          showToast(`Filtre: ${filter}`, 'info');
+        }}
+        onReset={handleResetFilter}
       />
-    </SafeAreaWrapper>
+
+      {filteredOpps.length === 0 ? (
+        <ScrollView
+          style={styles.listContainer}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View style={styles.emptyState}>
+            <MaterialCommunityIcons
+              name="briefcase-search"
+              size={64}
+              color="#ddd"
+            />
+            <Text style={styles.emptyTitle}>Aucune opportunité trouvée</Text>
+            <Text style={styles.emptySubtitle}>
+              Essayez d&apos;autres critères de recherche
+            </Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={handleResetFilter}
+            >
+              <Text style={styles.retryButtonText}>Réinitialiser les filtres</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      ) : (
+        <FlatList
+          data={filteredOpps}
+          renderItem={({ item }) => (
+            <OpportunityCard
+              opp={item}
+              isFavorited={opportunities.some((o) => o.id === item.id)}
+              onFavPress={() => handleToggleFavorite(item)}
+              onPress={() => handleOppPress(item.id)}
+            />
+          )}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          }
+        />
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#F9FAFB",
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 12,
+    flex: 1,
+    backgroundColor: '#f8f9fa',
   },
   searchContainer: {
-    marginBottom: 12,
-  },
-  searchInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    height: 48,
-    gap: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: '#e0e0e0',
+    height: 44,
   },
-  searchIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F9FAFB",
-    justifyContent: "center",
-    alignItems: "center",
+  searchIcon: {
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
-    color: "#111827",
-    fontWeight: "500",
+    color: '#333',
   },
-  actionButtons: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 16,
-  },
-  filterButton: {
-    flex: 1,
-    borderRadius: 24,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  filterButtonActive: {
-    shadowColor: "#FF6600",
-    shadowOpacity: 0.3,
-  },
-  filterButtonGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16,
-    height: 48,
-    gap: 6,
-  },
-  filterButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  filterButtonTextActive: {
-    color: "#FFFFFF",
-  },
-  subscribeButton: {
-    flex: 1,
-    borderRadius: 24,
-    overflow: "hidden",
-    shadowColor: "#3B82F6",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  subscribeGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16,
-    height: 48,
-    gap: 6,
-  },
-  subscribeText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#FF7F27",
-  },
-  filtersPanel: {
-    marginBottom: 12,
-    padding: 16,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  filterSection: {
-    marginBottom: 12,
-  },
-  filterLabelContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 10,
-  },
-  filterLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#374151",
-  },
-  filterOptions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  filterBtn: {
+  filterContainer: {
+    flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: "#F9FAFB",
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  filterButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 8,
     borderRadius: 20,
+    backgroundColor: '#f0f0f0',
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: '#e0e0e0',
   },
-  filterBtnActive: {
-    backgroundColor: "#FFF7ED",
-    borderColor: "#FF6600",
+  filterButtonActive: {
+    backgroundColor: '#FF8C42',
+    borderColor: '#FF8C42',
   },
-  filterBtnText: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "500",
+  filterText: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
   },
-  filterBtnTextActive: {
-    color: "#FF6600",
-    fontWeight: "700",
+  filterTextActive: {
+    color: '#fff',
   },
-  oppList: {
-    padding: 16,
+  resetButton: {
+    padding: 6,
+    marginLeft: 8,
   },
-
-  // CARD SIMPLIFIÉE EN MODE LISTE
-  oppCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    marginBottom: 12,
-    padding: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  oppMain: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 10,
-  },
-  oppIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  oppContent: {
+  listContainer: {
     flex: 1,
-    gap: 4,
   },
-  oppTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 2,
+  listContent: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
-  typeText: {
-    fontSize: 12.5,
-    fontWeight: "600",
-    letterSpacing: 0.5,
+  oppCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  montantBadge: {
-    backgroundColor: "#D1FAE5",
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  typeBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  typeBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  favoriteButton: {
+    padding: 6,
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    lineHeight: 18,
+    marginBottom: 4,
+  },
+  organization: {
+    fontSize: 12,
+    color: '#FF6600',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  cardMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 6,
+  },
+  metaTextValue: {
+    fontSize: 12,
+    color: '#10B981',
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    marginTop: 8,
+    flexWrap: 'wrap',
+  },
+  tag: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    marginRight: 6,
+    marginBottom: 4,
+  },
+  tagText: {
+    fontSize: 11,
+    color: '#666',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 100,
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginTop: 16,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#FF8C42',
     borderRadius: 8,
   },
-  montantText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#059669",
-  },
-  oppTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#111827",
-    lineHeight: 20,
-  },
-  oppOrganisme: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    fontWeight: "500",
-  },
-  oppFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-  },
-  oppInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  infoText: {
-    fontSize: 12,
-    color: "#6B7280",
-    fontWeight: "600",
-  },
-
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  emptyIconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#F3F4F6",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#374151",
-    marginTop: 8,
-  },
-  emptySubtext: {
+  retryButtonText: {
+    color: '#fff',
     fontSize: 14,
-    color: "#9CA3AF",
-    marginTop: 6,
-    fontWeight: "500",
+    fontWeight: '600',
   },
 });

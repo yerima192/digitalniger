@@ -3,16 +3,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
-  Linking,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Linking,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import SafeAreaWrapper from "../components/SafeAreaWrapper";
+import Toast from "../components/Toast";
 import { useFavorites } from "../context/FavoritesContext";
 import { opportunitesData } from "../data/opportunitesData";
 
@@ -21,14 +21,23 @@ export default function OpportuniteDetailScreen() {
   const params = useLocalSearchParams();
   const { isOpportunityFavorited, toggleOpportunityFavorite } = useFavorites();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
 
-  const opportunite = opportunitesData.find((o) => o.id === params.opportuniteId);
+  const opportunite = opportunitesData.find((o) => o.id === params.id);
 
   useEffect(() => {
     if (opportunite) {
       setIsFavorite(isOpportunityFavorited(opportunite.id));
     }
-  }, [opportunite]);
+  }, [opportunite, isOpportunityFavorited]);
+
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   if (!opportunite) {
     return (
@@ -49,20 +58,37 @@ export default function OpportuniteDetailScreen() {
 
   const handleVisitSite = () => {
     if (opportunite.lien) {
-      Linking.openURL(opportunite.lien).catch(() => {
-        Alert.alert("Erreur", "Impossible d'ouvrir le lien");
-      });
+      Linking.openURL(opportunite.lien)
+        .then(() => {
+          displayToast("Page ouverte", "success");
+        })
+        .catch(() => {
+          displayToast("Impossible d'ouvrir le lien", "error");
+        });
     }
   };
 
   const toggleFavorite = async () => {
     await toggleOpportunityFavorite(opportunite);
     setIsFavorite(!isFavorite);
+    displayToast(
+      !isFavorite ? "Ajouté aux favoris" : "Supprimé des favoris",
+      "success"
+    );
   };
 
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
+        {/* Toast Component */}
+        {showToast && (
+          <Toast
+            message={toastMessage}
+            type={toastType}
+            onHide={() => setShowToast(false)}
+          />
+        )}
+
         {/* Fixed Header Buttons */}
         <View style={styles.headerButtons}>
           <TouchableOpacity

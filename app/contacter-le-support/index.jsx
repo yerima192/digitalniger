@@ -1,16 +1,26 @@
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useState } from "react";
-import SafeAreaWrapper from "../../components/SafeAreaWrapper";
-import Header from "../../components/Header";
 import { router } from "expo-router";
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Header from "../../components/Header";
+import SafeAreaWrapper from "../../components/SafeAreaWrapper";
+import Toast from "../../components/Toast";
 
 export default function ContacterSupportScreen() {
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [sujet, setSujet] = useState("");
   const [message, setMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
+
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   const contactMethods = [
     {
@@ -47,6 +57,13 @@ export default function ContacterSupportScreen() {
 
   return (
     <SafeAreaWrapper>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onHide={() => setShowToast(false)}
+        />
+      )}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Header
           title="Contacter le support"
@@ -233,7 +250,21 @@ export default function ContacterSupportScreen() {
 
         {/* Boutons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.sendButton} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.sendButton} 
+            activeOpacity={0.8}
+            onPress={() => {
+              if (nom && email && sujet && message) {
+                displayToast("Message envoyé avec succès", "success");
+                setNom("");
+                setEmail("");
+                setSujet("");
+                setMessage("");
+              } else {
+                displayToast("Veuillez remplir tous les champs", "error");
+              }
+            }}
+          >
             <LinearGradient
               colors={["#FF7F27", "#FF6600"]}
               style={styles.sendButtonGradient}
@@ -243,7 +274,14 @@ export default function ContacterSupportScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.faqButton} activeOpacity={0.7} onPress={() => router.push('aide-support')}>
+          <TouchableOpacity 
+            style={styles.faqButton} 
+            activeOpacity={0.7} 
+            onPress={() => {
+              displayToast("Ouverture de la FAQ", "info");
+              router.push('aide-support');
+            }}
+          >
             <Ionicons name="help-circle-outline" size={20} color="#3B82F6" />
             <Text style={styles.faqButtonText}>Consulter la FAQ</Text>
           </TouchableOpacity>

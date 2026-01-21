@@ -3,7 +3,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   Image,
   Linking,
   Platform,
@@ -11,9 +10,10 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import SafeAreaWrapper from "../components/SafeAreaWrapper";
+import Toast from "../components/Toast";
 import { useFavorites } from "../context/FavoritesContext";
 import { acteursData } from "../data/acteursData";
 
@@ -22,14 +22,23 @@ export default function ActeurDetailScreen() {
   const params = useLocalSearchParams();
   const { isActorFavorited, toggleActorFavorite } = useFavorites();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [showToast, setShowToast] = useState(false);
 
-  const acteur = acteursData.find((a) => a.id === params.acteurId);
+  const acteur = acteursData.find((a) => a.id === params.id);
 
   useEffect(() => {
     if (acteur) {
       setIsFavorite(isActorFavorited(acteur.id));
     }
-  }, [acteur]);
+  }, [acteur, isActorFavorited]);
+
+  const displayToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
 
   if (!acteur) {
     return (
@@ -50,42 +59,71 @@ export default function ActeurDetailScreen() {
 
   const handleCall = () => {
     if (acteur.contact) {
-      Linking.openURL(`tel:${acteur.contact}`).catch(() => {
-        Alert.alert("Erreur", "Impossible d'ouvrir l'application téléphone");
-      });
+      Linking.openURL(`tel:${acteur.contact}`)
+        .then(() => {
+          displayToast("Appel lancé", "success");
+        })
+        .catch(() => {
+          displayToast("Impossible d'ouvrir l'application téléphone", "error");
+        });
     }
   };
 
   const toggleFavorite = async () => {
     await toggleActorFavorite(acteur);
     setIsFavorite(!isFavorite);
+    displayToast(
+      !isFavorite ? "Ajouté aux favoris" : "Supprimé des favoris",
+      "success"
+    );
   };
 
   const handleEmail = () => {
     if (acteur.email) {
-      Linking.openURL(`mailto:${acteur.email}`).catch(() => {
-        Alert.alert("Erreur", "Impossible d'ouvrir l'application email");
-      });
+      Linking.openURL(`mailto:${acteur.email}`)
+        .then(() => {
+          displayToast("Email ouvert", "success");
+        })
+        .catch(() => {
+          displayToast("Impossible d'ouvrir l'application email", "error");
+        });
     }
   };
 
   const handleWebsite = () => {
     if (acteur.website) {
-      Linking.openURL(acteur.website).catch(() => {
-        Alert.alert("Erreur", "Impossible d'ouvrir le site web");
-      });
+      Linking.openURL(acteur.website)
+        .then(() => {
+          displayToast("Site web ouvert", "success");
+        })
+        .catch(() => {
+          displayToast("Impossible d'ouvrir le site web", "error");
+        });
     }
   };
 
   const handleSocialMedia = (url) => {
-    Linking.openURL(url).catch(() => {
-      Alert.alert("Erreur", "Impossible d'ouvrir ce lien");
-    });
+    Linking.openURL(url)
+      .then(() => {
+        displayToast("Lien ouvert", "success");
+      })
+      .catch(() => {
+        displayToast("Impossible d'ouvrir ce lien", "error");
+      });
   };
 
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
+        {/* Toast Component */}
+        {showToast && (
+          <Toast
+            message={toastMessage}
+            type={toastType}
+            onHide={() => setShowToast(false)}
+          />
+        )}
+
         {/* Fixed Header Buttons */}
         <View style={styles.headerButtons}>
           <TouchableOpacity

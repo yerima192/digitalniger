@@ -2,11 +2,11 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useAuth, USER_TYPES } from "../../context/AuthContext";
+import { USER_TYPES } from "../../context/AuthContext";
 
 const SelectUserType = () => {
   const router = useRouter();
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [selectedType, setSelectedType] = useState(null);
 
   const userTypesList = [
